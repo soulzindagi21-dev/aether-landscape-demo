@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+<meta name="theme-color" content="#04070e" />
+<title>AURA ONE — Wireless Headphones</title>
+<link rel="stylesheet" href="engine.css" />
+<style>
+/* THEME: PREMIUM ELECTRONICS — futuristic, cool electric-blue / cyan, clean */
+:root{
+  --bg:#04070e; --bg2:#081426; --ink:#eef4ff; --muted:#8ea6c8;
+  --accent:#38bdf8; --accent2:#4f46e5; --glass:rgba(255,255,255,.05);
+  --line:rgba(255,255,255,.12);
+  --font:"Helvetica Neue",Inter,system-ui,sans-serif;
+}
+.title{font-weight:200!important;letter-spacing:-.02em!important}
+.title b{font-weight:600!important}
+.btn{border-radius:8px!important}
+.entry-mark{font-weight:200;letter-spacing:.5em}
+.env{background:radial-gradient(120% 90% at 75% 5%,#0f2547 0%,var(--bg2) 45%,var(--bg) 100%)!important}
+.orb.a{background:radial-gradient(circle,var(--accent) 0%,transparent 62%);opacity:.4}
+.orb.b{background:radial-gradient(circle,var(--accent2) 0%,transparent 62%);opacity:.45}
+.orb.c{background:radial-gradient(circle,#22d3ee 0%,transparent 58%);opacity:.22}
+/* product silhouette accent on story scene */
+.prod-ring{position:absolute;top:50%;left:70%;width:min(40vmin,340px);height:min(40vmin,340px);
+  transform:translate(-50%,-50%);border-radius:50%;
+  border:1px solid rgba(56,189,248,.35);box-shadow:0 0 80px rgba(56,189,248,.25) inset;
+  z-index:1;pointer-events:none;animation:spin 24s linear infinite}
+.prod-ring::before{content:"";position:absolute;inset:14%;border-radius:50%;
+  border:1px solid rgba(79,70,229,.4)}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@media (max-height:430px){.prod-ring{width:min(34vmin,220px);height:min(34vmin,220px)}}
+</style>
+</head>
+<body>
+<script>
+function spec(rows){return '<div class="spec">'+rows.map(function(r){return '<div><span>'+r[0]+'</span><b>'+r[1]+'</b></div>';}).join('')+'</div>';}
+window.DEMO = {
+  brand:"AURA ONE",
+  entryTagline:"Product Launch · 2026",
+  homeHref:"index.html",
+  scenes:[
+    { id:"intro", trans:"zoom",
+      eyebrow:"Introducing",
+      title:'Aura <b>One</b>',
+      lede:"Adaptive spatial audio in a 228-gram frame. The headphone that reads the room before you do.",
+      ctas:[{label:"Discover",style:"solid",go:1},{label:"Buy Now",go:3}]
+    },
+    { id:"story", trans:"pan",
+      eyebrow:"Engineered Sound",
+      title:'Silence,<br><b>Perfected</b>',
+      lede:"Explore the acoustics, the materials and the intelligence inside. Tap a point to reveal each system.",
+      ctas:[{label:"Full Specs",style:"solid",modal:"specs"},{label:"Continue",go:2}],
+      hotspots:[
+        {x:"70%",y:"32%",label:"Drivers",modal:"drivers"},
+        {x:"64%",y:"66%",label:"Noise Cancelling",modal:"anc"},
+        {x:"82%",y:"52%",label:"Materials",modal:"materials"}
+      ]
+    },
+    { id:"specs", trans:"mask",
+      eyebrow:"The Details",
+      title:'Every <b>Gram</b><br>Considered',
+      lede:"Aerospace aluminium, protein-leather cushions, 40-hour battery. Compact panels — no scrolling required.",
+      ctas:[{label:"Compare Models",style:"solid",modal:"compare"},{label:"Next",go:3}]
+    },
+    { id:"cta", trans:"zoom",
+      eyebrow:"Available Now",
+      title:'Hear the<br><b>Difference</b>',
+      lede:"Preorder ships in 14 days. Free returns for 30.",
+      ctas:[
+        {label:"Buy — ₹34,900",style:"solid",href:"#buy"},
+        {label:"Preorder",href:"#preorder"},
+        {label:"Watch Demo",href:"https://youtube.com"},
+        {label:"Compare",modal:"compare"},
+        {label:"Contact Sales",modal:"contact"},
+        {label:"↺ Restart",go:0}
+      ]
+    }
+  ],
+  modals:{
+    specs:{title:"Specifications",tabs:[
+      {name:"Overview",html:"<p>Aura One pairs a 40mm bio-cellulose driver with adaptive ANC and spatial head-tracking. Replace with real product copy.</p>"},
+      {name:"Audio",html:spec([["Driver","40mm"],["Range","4Hz–40kHz"],["Codecs","LDAC · AAC"],["Spatial","Yes"]])},
+      {name:"Battery",html:spec([["Playback","40 hrs"],["ANC on","30 hrs"],["Charge","USB-C"],["Quick","5min=4hr"]])},
+      {name:"Fit",html:spec([["Weight","228 g"],["Cushion","Protein leather"],["Frame","Aluminium"],["Fold","Flat"]])}
+    ]},
+    drivers:{title:"Acoustic Engine",tabs:[
+      {name:"Driver",html:"<p>Custom 40mm bio-cellulose diaphragm tuned for flat response and low distortion. Placeholder engineering note.</p>"},
+      {name:"Numbers",html:spec([["Size","40mm"],["THD","<0.1%"],["Impedance","32Ω"],["Sensitivity","104dB"]])}
+    ]},
+    anc:{title:"Adaptive ANC",tabs:[
+      {name:"How",html:"<p>Eight microphones sample ambient noise 48,000× per second and adapt the cancellation profile in real time.</p>"},
+      {name:"Modes",html:spec([["Adaptive","Auto"],["Transparency","Yes"],["Wind","Reduced"],["Voice","Passthrough"]])}
+    ]},
+    materials:{title:"Materials",tabs:[
+      {name:"Build",html:"<p>Anodised aerospace aluminium yoke, memory-foam cushions wrapped in vegan protein leather.</p>"}
+    ]},
+    compare:{title:"Compare",tabs:[
+      {name:"Line-up",html:spec([["Aura One","₹34,900"],["Aura Lite","₹22,900"],["Aura Pro","₹49,900"],["Aura Studio","₹64,900"]])}
+    ]},
+    contact:{title:"Contact Sales",tabs:[
+      {name:"Reach us",html:"<p>sales@auraaudio.example<br>+91 00000 00000<br>Mon–Sat, 10–7 IST</p>"}
+    ]}
+  }
+};
+</script>
+<script src="engine.js"></script>
+<script>
+/* theme-only flourish: rotating product ring on scene 2 (visual, non-blocking) */
+window.addEventListener('load',()=>{
+  const story=document.querySelector('.scene[data-i="1"]');
+  if(story){const r=document.createElement('div');r.className='prod-ring';story.prepend(r);}
+});
+</script>
+</body>
+</html>

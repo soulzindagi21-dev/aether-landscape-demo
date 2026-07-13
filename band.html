@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+<meta name="theme-color" content="#0a0308" />
+<title>NOCTURNE VELVET — Live Album Experience</title>
+<link rel="stylesheet" href="engine.css" />
+<style>
+/* THEME: ROCK BAND — dark, moody, crimson/violet stage energy */
+:root{
+  --bg:#0a0308; --bg2:#180611; --ink:#f6eef0; --muted:#b79aa2;
+  --accent:#e11d48; --accent2:#a21caf; --glass:rgba(255,255,255,.05);
+  --line:rgba(255,255,255,.13);
+  --font:"Georgia","Times New Roman",serif;
+}
+.title{font-weight:700!important;letter-spacing:-.02em!important;text-transform:uppercase}
+.title b{font-weight:900!important}
+.eyebrow{font-family:"Helvetica Neue",sans-serif}
+.btn{font-family:"Helvetica Neue",sans-serif;border-radius:4px!important}
+.entry-mark{font-weight:900;letter-spacing:.1em}
+.env{background:radial-gradient(120% 90% at 50% 110%,#3a0518 0%,var(--bg2) 45%,var(--bg) 100%)!important}
+.orb.a{background:radial-gradient(circle,var(--accent) 0%,transparent 60%)}
+.orb.b{background:radial-gradient(circle,var(--accent2) 0%,transparent 60%)}
+/* stage spotlight sweep */
+.orb.c{background:radial-gradient(circle,#ff9e40 0%,transparent 55%);opacity:.3}
+</style>
+</head>
+<body>
+<script>
+function spec(rows){return '<div class="spec">'+rows.map(function(r){return '<div><span>'+r[0]+'</span><b>'+r[1]+'</b></div>';}).join('')+'</div>';}
+window.DEMO = {
+  brand:"NOCTURNE VELVET",
+  entryTagline:"Live Album Experience",
+  homeHref:"index.html",
+  scenes:[
+    { id:"intro", trans:"zoom",
+      eyebrow:"New Album · Out Now",
+      title:'Nocturne<br><b>Velvet</b>',
+      lede:"Five nights. One record cut live to tape. A dark-romantic rock record recorded in a converted cathedral.",
+      ctas:[{label:"Enter the Record",style:"solid",go:1},{label:"Skip to Tour",go:3}]
+    },
+    { id:"story", trans:"pan",
+      eyebrow:"The Album — “Ash & Gold”",
+      title:'Recorded<br>in the <b>Dark</b>',
+      lede:"Tap the stage to explore the album, the tour, and the story behind the band.",
+      bg:"radial-gradient(90% 90% at 70% 20%,rgba(225,29,72,.22),transparent 55%),radial-gradient(80% 80% at 20% 90%,rgba(162,28,175,.22),transparent 60%)",
+      ctas:[{label:"Continue",style:"solid",go:2}],
+      hotspots:[
+        {x:"70%",y:"36%",label:"The Album",modal:"album"},
+        {x:"28%",y:"62%",label:"Tour Dates",modal:"tour"},
+        {x:"84%",y:"74%",label:"Band Story",modal:"story"}
+      ]
+    },
+    { id:"press", trans:"mask",
+      eyebrow:"The Band",
+      title:'Four. <b>Loud.</b><br>Relentless.',
+      lede:"A band built for the room, not the algorithm. Press has called them the loudest quiet band in the country.",
+      ctas:[{label:"Press & Highlights",style:"solid",modal:"press"},{label:"Next",go:3}]
+    },
+    { id:"cta", trans:"zoom",
+      eyebrow:"Join the Night",
+      title:'Hear It<br><b>Live</b>',
+      lede:"Stream the record, catch a show, or bring the noise home.",
+      ctas:[
+        {label:"Listen",style:"solid",href:"https://open.spotify.com"},
+        {label:"Watch",href:"https://youtube.com"},
+        {label:"Tour Dates",modal:"tour"},
+        {label:"Merch",href:"#merch"},
+        {label:"Book the Band",modal:"booking"},
+        {label:"↺ Restart",go:0}
+      ]
+    }
+  ],
+  modals:{
+    album:{title:"Ash & Gold",tabs:[
+      {name:"Overview",html:"<p>The second full-length from Nocturne Velvet — ten tracks cut live over five nights, no overdubs. Swap this for the real album narrative.</p>"},
+      {name:"Tracks",html:spec([["Tracks","10"],["Runtime","44 min"],["Format","Vinyl · Digital"],["Released","2026"]])},
+      {name:"Credits",html:"<p>Produced by placeholder. Mixed at placeholder studio. Replace with real liner-note credits.</p>"}
+    ]},
+    tour:{title:"Ash & Gold Tour",tabs:[
+      {name:"Dates",html:spec([["Mumbai","12 Aug"],["Bengaluru","15 Aug"],["Hyderabad","18 Aug"],["Delhi","22 Aug"]])},
+      {name:"Info",html:"<p>Doors 7pm. 18+. General admission. Placeholder venue and ticketing details go here.</p>"}
+    ]},
+    story:{title:"The Band",tabs:[
+      {name:"Origin",html:"<p>Formed in a basement, forged on the road. A two-line origin myth belongs here — keep it lean and cinematic.</p>"},
+      {name:"Members",html:spec([["Vocals","Placeholder"],["Guitar","Placeholder"],["Bass","Placeholder"],["Drums","Placeholder"]])}
+    ]},
+    press:{title:"Press",tabs:[
+      {name:"Quotes",html:"<p>“A staggering live force.” — Placeholder Mag<br>“Dark, romantic, deafening.” — Placeholder Zine</p>"},
+      {name:"Numbers",html:spec([["Monthly","480K"],["Shows","120+"],["Countries","14"],["Since","2019"]])}
+    ]},
+    booking:{title:"Booking",tabs:[
+      {name:"Contact",html:"<p>booking@nocturnevelvet.example<br>+91 00000 00000<br>@nocturnevelvet</p>"}
+    ]}
+  }
+};
+</script>
+<script src="engine.js"></script>
+</body>
+</html>

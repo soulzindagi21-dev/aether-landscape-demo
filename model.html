@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+<meta name="theme-color" content="#0c0a08" />
+<title>ELIRA VANCE — Portfolio</title>
+<link rel="stylesheet" href="engine.css" />
+<style>
+/* THEME: MODEL / ACTOR — editorial, light, warm champagne / stone, airy */
+:root{
+  --bg:#0c0a08; --bg2:#171310; --ink:#f7f2ea; --muted:#b9ac9c;
+  --accent:#d8b48a; --accent2:#a88968; --glass:rgba(255,255,255,.055);
+  --line:rgba(255,255,255,.15);
+  --font:"Georgia","Didot","Times New Roman",serif;
+}
+.title{font-weight:300!important;letter-spacing:.01em!important}
+.title b{font-weight:500!important;font-style:italic}
+.eyebrow{font-family:"Helvetica Neue",sans-serif;letter-spacing:.5em!important}
+.btn{font-family:"Helvetica Neue",sans-serif;border-radius:0!important;letter-spacing:.2em!important}
+.entry-mark{font-weight:300;font-style:italic;letter-spacing:.18em}
+.lede{font-style:italic}
+.env{background:radial-gradient(120% 90% at 30% 0%,#241d16 0%,var(--bg2) 45%,var(--bg) 100%)!important}
+.orb.a{background:radial-gradient(circle,var(--accent) 0%,transparent 62%);opacity:.35}
+.orb.b{background:radial-gradient(circle,var(--accent2) 0%,transparent 62%);opacity:.4}
+.orb.c{background:radial-gradient(circle,#e8ddcb 0%,transparent 58%);opacity:.18}
+.grain{opacity:.03!important}
+/* editorial thin frame lines on story scene */
+.edito-frame{position:absolute;inset:clamp(20px,5vh,50px) clamp(28px,7vw,90px);
+  border:1px solid rgba(216,180,138,.28);z-index:1;pointer-events:none}
+.edito-frame::before{content:"EDITORIAL — 2026";position:absolute;top:-9px;left:20px;
+  background:var(--bg);padding:0 10px;font-family:"Helvetica Neue",sans-serif;
+  font-size:9px;letter-spacing:.4em;color:var(--accent)}
+</style>
+</head>
+<body>
+<script>
+function spec(rows){return '<div class="spec">'+rows.map(function(r){return '<div><span>'+r[0]+'</span><b>'+r[1]+'</b></div>';}).join('')+'</div>';}
+window.DEMO = {
+  brand:"ELIRA VANCE",
+  entryTagline:"Portfolio · Model & Actor",
+  homeHref:"index.html",
+  scenes:[
+    { id:"intro", trans:"mask",
+      eyebrow:"Model · Actor",
+      title:'Elira<br><b>Vance</b>',
+      lede:"Editorial, runway and screen. Represented internationally. A presence built for the frame.",
+      ctas:[{label:"View Portfolio",style:"solid",go:1},{label:"Booking",go:3}]
+    },
+    { id:"folio", trans:"pan",
+      eyebrow:"Selected Work",
+      title:'The <b>Portfolio</b>',
+      lede:"A curated body of work across fashion, film and campaign. Tap to explore each strand.",
+      ctas:[{label:"Continue",style:"solid",go:2}],
+      hotspots:[
+        {x:"30%",y:"34%",label:"Editorial",modal:"editorial"},
+        {x:"72%",y:"48%",label:"Showreel",modal:"showreel"},
+        {x:"58%",y:"74%",label:"Campaigns",modal:"campaigns"}
+      ]
+    },
+    { id:"profile", trans:"mask",
+      eyebrow:"Profile",
+      title:'Presence<br>& <b>Range</b>',
+      lede:"Represented by placeholder agency. Full stats, experience and contact in compact panels.",
+      ctas:[{label:"Full Profile",style:"solid",modal:"profile"},{label:"Next",go:3}]
+    },
+    { id:"cta", trans:"zoom",
+      eyebrow:"Get in Touch",
+      title:'Let’s<br><b>Create</b>',
+      lede:"Available for editorial, campaign and select film work worldwide.",
+      ctas:[
+        {label:"Book Elira",style:"solid",modal:"booking"},
+        {label:"Showreel",href:"https://vimeo.com"},
+        {label:"Portfolio PDF",href:"#pdf"},
+        {label:"Instagram",href:"https://instagram.com"},
+        {label:"Contact",modal:"booking"},
+        {label:"↺ Restart",go:0}
+      ]
+    }
+  ],
+  modals:{
+    editorial:{title:"Editorial",tabs:[
+      {name:"Work",html:"<p>Featured in placeholder Vogue, placeholder Elle and independent editorials across three continents. Swap for real credits.</p>"},
+      {name:"Highlights",html:spec([["Covers","6"],["Editorials","40+"],["Cities","Paris · Milan"],["Since","2021"]])}
+    ]},
+    showreel:{title:"Showreel",tabs:[
+      {name:"Screen",html:"<p>Short-form film, commercial and campaign motion work. Link the real reel via the Showreel button.</p>"},
+      {name:"Roles",html:spec([["Features","2"],["Shorts","7"],["Commercials","15+"],["Agency","Placeholder"]])}
+    ]},
+    campaigns:{title:"Campaigns",tabs:[
+      {name:"Brands",html:"<p>Global and regional campaign work for placeholder fashion and beauty houses. Replace with real brand list.</p>"}
+    ]},
+    profile:{title:"Profile",tabs:[
+      {name:"Bio",html:"<p>A two-sentence editorial bio belongs here — poised, brief, cinematic. Represented internationally.</p>"},
+      {name:"Stats",html:spec([["Height","5'10\""],["Eyes","Hazel"],["Hair","Auburn"],["Based","Mumbai"]])},
+      {name:"Experience",html:spec([["Runway","Yes"],["Film","Yes"],["Languages","3"],["Travel","Global"]])},
+      {name:"Contact",html:"<p>agency@example.com<br>+91 00000 00000<br>@eliravance</p>"}
+    ]},
+    booking:{title:"Booking",tabs:[
+      {name:"Enquiries",html:"<p>bookings@eliravance.example<br>+91 00000 00000<br>Via agency: placeholder mgmt</p>"}
+    ]}
+  }
+};
+</script>
+<script src="engine.js"></script>
+<script>
+window.addEventListener('load',()=>{
+  const folio=document.querySelector('.scene[data-i="1"]');
+  if(folio){const f=document.createElement('div');f.className='edito-frame';folio.prepend(f);}
+});
+</script>
+</body>
+</html>
