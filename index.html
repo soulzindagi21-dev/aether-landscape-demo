@@ -67,8 +67,18 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   animation:load 1.1s var(--ease) infinite}
 @keyframes load{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
 
+/* ---------- entry gate ---------- */
+#entry{position:fixed;inset:0;z-index:95;display:grid;place-items:center;text-align:center;
+  background:radial-gradient(120% 90% at 50% 0%,#141a30 0%,var(--bg2) 45%,var(--bg) 100%);
+  transition:opacity .8s var(--ease)}
+#entry.hide{opacity:0;pointer-events:none}
+.entry-mark{font-size:clamp(30px,7vw,64px);font-weight:200;letter-spacing:.42em;
+  padding-left:.42em;margin:14px 0 30px;text-shadow:0 0 50px rgba(201,161,90,.3)}
+.entry-inner .btn{margin:0 auto}
+.entry-hint{margin-top:20px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+
 /* ---------- portrait overlay ---------- */
-#rotate{position:fixed;inset:0;z-index:90;display:none;place-items:center;
+#rotate{position:fixed;inset:0;z-index:110;display:none;place-items:center;
   text-align:center;background:linear-gradient(160deg,#0a0d18,#05060b)}
 #rotate.show{display:grid}
 .rot-inner{padding:0 12vw}
@@ -212,6 +222,15 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   <div class="load-mark" id="loadMark">AETHER</div>
   <div class="load-bar"><i></i></div>
 </div></div>
+
+<div id="entry">
+  <div class="entry-inner">
+    <div class="eyebrow" style="text-align:center">A Cinematic Presentation</div>
+    <div class="entry-mark">AETHER</div>
+    <button class="btn solid" id="enterBtn">Enter Experience<span class="arr">→</span></button>
+    <p class="entry-hint">Best experienced in landscape &amp; fullscreen</p>
+  </div>
+</div>
 
 <div id="rotate">
   <div class="rot-inner">
@@ -431,11 +450,22 @@ matchMedia('(orientation:portrait)').addEventListener('change',checkOrient);
 addEventListener('resize',checkOrient);
 document.getElementById('skipPortrait').onclick=()=>{portraitDismissed=true;rotate.classList.remove('show');};
 
-/* entry: fullscreen + orientation lock, both optional */
-async function enterExperience(){
-  try{ await document.documentElement.requestFullscreen?.({navigationUI:"hide"}); }catch{}
-  try{ await screen.orientation?.lock?.("landscape"); }catch{}
-  startExperience();
+/* ---------- entry gate: fullscreen must be called directly in the
+   user-generated click, before any other async work ---------- */
+async function requestAppFullscreen(){
+  const element=document.documentElement;
+  try{
+    if(element.requestFullscreen){
+      await element.requestFullscreen({navigationUI:"hide"});
+    }else if(element.webkitRequestFullscreen){
+      element.webkitRequestFullscreen();
+    }
+  }catch(error){
+    console.warn("Fullscreen request failed:",error);
+  }
+}
+function hideEntryOverlay(){
+  document.getElementById('entry').classList.add('hide');
 }
 function startExperience(){
   scenes[0].classList.add('active','enter-zoom');
@@ -443,18 +473,29 @@ function startExperience(){
   updateHUD(0); checkOrient();
 }
 
-/* boot: loader, then auto-start after first paint.
-   NOTE: real fullscreen/orientation need a user gesture — the Enter
-   button in scene 1 (Explore) is a safe place; we also expose enterExperience
-   on first tap anywhere for phones. */
-let entered=false;
-function firstGesture(){ if(entered)return; entered=true; enterExperience(); }
-addEventListener('pointerdown',firstGesture,{once:true});
+document.getElementById('enterBtn').addEventListener("click", async ()=>{
+  await requestAppFullscreen();           // first call in the gesture, no prior async work
+  try{
+    await screen.orientation?.lock?.("landscape");
+  }catch(error){
+    console.warn("Orientation lock unavailable:",error);
+  }
+  hideEntryOverlay();
+  startExperience();
+});
 
+/* fullscreen diagnostics (testing) */
+document.addEventListener("fullscreenchange",()=>{
+  console.log("fullscreenchange — fullscreenElement:",document.fullscreenElement);
+});
+document.addEventListener("fullscreenerror",e=>{
+  console.warn("fullscreenerror:",e);
+});
+
+/* boot: loader hides on its own; the experience waits behind the entry gate */
 window.addEventListener('load',()=>{
   setTimeout(()=>{
     document.getElementById('loader').classList.add('hide');
-    startExperience();
   },1100);
 });
 </script>
