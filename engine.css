@@ -254,3 +254,104 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 @media (max-width:640px) and (orientation:portrait){
   .sel-grid{grid-template-columns:1fr}
 }
+
+/* ============================================================
+   VIDEO SUBSYSTEM — loop backgrounds, wipe transitions, layouts
+   ============================================================ */
+/* scene video background: poster-first, video fades in when ready */
+.scene-media{position:absolute;inset:0;z-index:0;overflow:hidden}
+.scene-media .plate,.scene-media video{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center}
+.scene-media .plate{background-size:cover;background-position:center}
+.scene-media video{opacity:0;transition:opacity 1.2s var(--ease)}
+.scene-media video.ready{opacity:1}
+.scene-media .tint{position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.35) 45%,rgba(0,0,0,.15) 100%)}
+/* tint direction flips per layout */
+.layout-right .scene-media .tint{background:linear-gradient(270deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.35) 45%,rgba(0,0,0,.15) 100%)}
+.layout-center .scene-media .tint,.layout-minimal .scene-media .tint{
+  background:radial-gradient(85% 85% at 50% 50%,rgba(0,0,0,.1) 30%,rgba(0,0,0,.7) 100%)}
+.layout-lower .scene-media .tint{background:linear-gradient(180deg,rgba(0,0,0,.05) 35%,rgba(0,0,0,.8) 100%)}
+.layout-split .scene-media .tint{background:none}
+
+/* wipe transition overlay */
+#wipe{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0}
+#wipe video{width:100%;height:100%;object-fit:cover}
+#wipe.play{opacity:1}
+
+/* ---------- layout system ---------- */
+/* default = anchor left (existing .wrap behaviour) */
+.layout-right .wrap{align-items:flex-end;text-align:right}
+.layout-right .lede{margin-left:auto}
+.layout-right .cta-row{justify-content:flex-end}
+
+.layout-center .wrap{align-items:center;text-align:center}
+.layout-center .lede{margin-left:auto;margin-right:auto;max-width:min(58ch,72%)}
+.layout-center .cta-row{justify-content:center}
+
+.layout-lower .wrap{justify-content:flex-end;padding-bottom:clamp(28px,7vh,64px)}
+.layout-lower .title{font-size:clamp(26px,6vw,64px)}
+.layout-lower .lede{max-width:min(60ch,70%)}
+
+.layout-split .wrap{width:46%;min-width:300px;height:100%;margin-left:auto;
+  background:linear-gradient(90deg,transparent 0%,rgba(4,5,10,.88) 18%,rgba(4,5,10,.94) 100%);
+  padding-left:clamp(30px,5vw,70px)}
+.layout-split.scene .scene-media{width:60%;right:auto}
+.layout-split .scene-media .plate,.layout-split .scene-media video{object-position:center}
+
+.layout-minimal .wrap{align-items:center;justify-content:flex-end;text-align:center;
+  padding-bottom:clamp(30px,8vh,70px)}
+.layout-minimal .lede{display:none}
+.layout-minimal .eyebrow{display:none}
+.layout-minimal .cta-row{justify-content:center}
+
+@media (max-height:430px){
+  .layout-split .wrap{width:52%}
+  .layout-lower .wrap{padding-bottom:20px}
+}
+
+/* ============================================================
+   TITLE TREATMENTS — CSS metallic type + image logotype support
+   ============================================================ */
+/* CSS chrome/metal fill: apply class "metal" on .title via config titleClass */
+.title.metal{
+  background:linear-gradient(175deg,
+    #fdf6ec 0%, #f3d9a4 18%, var(--accent) 38%,
+    #7a1230 55%, var(--accent) 70%, #f8e3b0 88%, #fff 100%);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+  filter:
+    drop-shadow(0 1px 0 rgba(255,240,210,.55))
+    drop-shadow(0 3px 2px rgba(0,0,0,.85))
+    drop-shadow(0 0 26px rgba(225,29,72,.4));
+  background-size:100% 130%;
+  animation:metalShift 7s ease-in-out infinite alternate;
+}
+.title.metal b{-webkit-text-fill-color:transparent}
+@keyframes metalShift{from{background-position:0 0}to{background-position:0 30%}}
+
+/* image logotype: replaces text title when scene.titleImage is set */
+.title-img{position:relative;display:block;width:min(46vw,560px);max-height:34dvh;
+  margin-bottom:4px;user-select:none;-webkit-user-drag:none}
+.title-img img{width:100%;height:auto;max-height:34dvh;object-fit:contain;object-position:left center;
+  filter:drop-shadow(0 0 30px rgba(225,29,72,.35));
+  animation:logoBreath 5.5s ease-in-out infinite}
+.layout-center .title-img{margin-left:auto;margin-right:auto}
+.layout-center .title-img img{object-position:center}
+.layout-right .title-img{margin-left:auto}
+.layout-right .title-img img{object-position:right center}
+@keyframes logoBreath{
+  0%,100%{filter:drop-shadow(0 0 22px rgba(225,29,72,.28));transform:translateY(0)}
+  50%{filter:drop-shadow(0 0 44px rgba(225,29,72,.5));transform:translateY(-4px)}
+}
+/* sheen sweep across the logotype */
+.title-img::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 42%,rgba(255,245,225,.32) 50%,transparent 58%);
+  background-size:280% 100%;background-position:120% 0;
+  mix-blend-mode:screen;
+  animation:sheen 6s var(--ease) infinite}
+@keyframes sheen{0%,55%{background-position:120% 0}85%,100%{background-position:-60% 0}}
+@media (prefers-reduced-motion:reduce){
+  .title.metal,.title-img img,.title-img::after{animation:none!important}
+}
+@media (max-height:430px){.title-img{width:min(52vw,420px);max-height:40dvh}}

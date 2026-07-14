@@ -39,6 +39,7 @@
         <div class="grain"></div><div class="vignette"></div>
       </div>
       <div class="stage" id="stage"></div>
+      <div id="wipe"></div>
       <div id="modal" role="dialog" aria-modal="true"><div class="card">
         <div class="card-head"><h3 id="mTitle">Detail</h3>
           <button class="card-close" id="mClose" aria-label="Close">&times;</button></div>
@@ -67,8 +68,15 @@
 
   SCENES.forEach((s,i)=>{
     const el=document.createElement('section');
-    el.className='scene'; el.dataset.i=i; el.setAttribute('role','tabpanel');
+    el.className='scene'+(s.layout?' layout-'+s.layout:''); el.dataset.i=i; el.setAttribute('role','tabpanel');
     if(s.bg) el.style.background=s.bg;
+    /* media layer: poster plate always, loop video lazily attached */
+    let media='';
+    if(s.poster||s.loop){
+      media=`<div class="scene-media">
+        <div class="plate" ${s.poster?`style="background-image:url('${s.poster}')"`:''}></div>
+        <div class="tint"></div></div>`;
+    }
     const spots=(s.hotspots||[]).map(h=>
       `<button class="hotspot" style="left:${h.x};top:${h.y}" data-modal="${h.modal}" aria-label="${h.label}">
          <span class="ring"></span><span class="dot"></span><span class="lbl">${h.label}</span></button>`).join('');
@@ -77,9 +85,12 @@
       const attr=c.href?`data-href="${c.href}"`:c.modal?`data-modal="${c.modal}"`:`data-go="${c.go}"`;
       return `<button class="${cls}" ${attr}>${c.label}<span class="arr">→</span></button>`;
     }).join('');
-    el.innerHTML=`${spots}<div class="wrap">
+    const titleHtml = s.titleImage
+      ? `<div class="title-img rise d2"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}"></div>`
+      : `<h1 class="title${s.titleClass?' '+s.titleClass:''} rise d2">${s.title||''}</h1>`;
+    el.innerHTML=`${media}${spots}<div class="wrap">
       <div class="eyebrow rise d1">${s.eyebrow||''}</div>
-      <h1 class="title rise d2">${s.title||''}</h1>
+      ${titleHtml}
       <p class="lede rise d3">${s.lede||''}</p>
       <div class="cta-row rise d4">${ctas}</div></div>`;
     stage.appendChild(el);
@@ -88,20 +99,84 @@
   });
   const scenes=[...document.querySelectorAll('.scene')];
 
+  /* ---------- loop video manager: one active decoder at a time ---------- */
+  const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function ensureLoopVideo(i){
+    const s=SCENES[i]; if(!s||!s.loop||reducedMotion) return null;
+    const holder=scenes[i].querySelector('.scene-media'); if(!holder) return null;
+    let v=holder.querySelector('video');
+    if(!v){
+      v=document.createElement('video');
+      v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline','');
+      v.preload='auto'; v.src=s.loop;
+      if(s.poster) v.poster=s.poster;
+      v.addEventListener('canplay',()=>v.classList.add('ready'),{once:true});
+      v.addEventListener('error',()=>{ v.remove(); },{once:true}); /* plate stays */
+      holder.insertBefore(v, holder.querySelector('.tint'));
+    }
+    return v;
+  }
+  function playScene(i){
+    scenes.forEach((sc,j)=>{
+      const v=sc.querySelector('.scene-media video');
+      if(v && j!==i){ v.pause(); }
+    });
+    const v=ensureLoopVideo(i);
+    if(v){ const p=v.play(); if(p) p.catch(()=>{}); }
+    /* warm the next scene's video so the swap is instant */
+    if(SCENES[i+1]&&SCENES[i+1].loop) ensureLoopVideo(i+1);
+  }
+
+  /* ---------- wipe transition layer ---------- */
+  const wipeEl=document.getElementById('wipe');
+  const WIPES=(DEMO.wipes||[]).slice();
+  let wipeIdx=0, wipeVideos=[];
+  function prepWipes(){
+    if(reducedMotion) return;
+    WIPES.forEach(src=>{
+      const v=document.createElement('video');
+      v.muted=true; v.playsInline=true; v.setAttribute('playsinline','');
+      v.preload='auto'; v.src=src; v.style.display='none';
+      v.addEventListener('error',()=>{ const k=wipeVideos.indexOf(v); if(k>-1)wipeVideos.splice(k,1); v.remove(); },{once:true});
+      wipeEl.appendChild(v); wipeVideos.push(v);
+    });
+  }
+  /* plays a wipe over the swap; calls midpoint() when the frame is covered */
+  function runWipe(midpoint){
+    if(!wipeVideos.length||reducedMotion){ midpoint(); return; }
+    const v=wipeVideos[wipeIdx%wipeVideos.length]; wipeIdx++;
+    wipeVideos.forEach(x=>x.style.display='none');
+    v.style.display='block'; v.currentTime=0;
+    wipeEl.classList.add('play');
+    let fired=false;
+    const mid=()=>{ if(!fired){fired=true; midpoint();} };
+    /* fire midpoint at 40% of the clip (opaque moment), end overlay on 'ended' */
+    const onTime=()=>{ if(v.duration && v.currentTime>=v.duration*0.4) { mid(); v.removeEventListener('timeupdate',onTime);} };
+    v.addEventListener('timeupdate',onTime);
+    v.addEventListener('ended',()=>{ wipeEl.classList.remove('play'); },{once:true});
+    const p=v.play();
+    if(p) p.catch(()=>{ wipeEl.classList.remove('play'); mid(); });
+    /* safety: never strand the overlay */
+    setTimeout(()=>{ mid(); wipeEl.classList.remove('play'); }, 2500);
+  }
+
   function goTo(n){
     if(busy||n===current||n<0||n>=scenes.length)return;
     busy=true;
-    const from=scenes[current], to=scenes[n], t=SCENES[n].trans||'zoom';
-    from.classList.add('leave-'+t); to.classList.add('enter-'+t);
-    void to.offsetWidth;
-    to.classList.add('active'); from.classList.remove('active');
-    updateHUD(n);
-    setTimeout(()=>{
-      from.className='scene';
-      to.querySelectorAll('.rise').forEach(r=>{r.style.animation='none';void r.offsetWidth;r.style.animation='';});
-      to.classList.remove('enter-'+t);
-      current=n; busy=false;
-    },1000);
+    const doSwap=()=>{
+      const from=scenes[current], to=scenes[n], t=SCENES[n].trans||'zoom';
+      from.classList.add('leave-'+t); to.classList.add('enter-'+t);
+      void to.offsetWidth;
+      to.classList.add('active'); from.classList.remove('active');
+      updateHUD(n); playScene(n);
+      setTimeout(()=>{
+        from.className='scene'+(SCENES[+from.dataset.i].layout?' layout-'+SCENES[+from.dataset.i].layout:'');
+        to.querySelectorAll('.rise').forEach(r=>{r.style.animation='none';void r.offsetWidth;r.style.animation='';});
+        to.classList.remove('enter-'+t);
+        current=n; busy=false;
+      },1000);
+    };
+    runWipe(doSwap);
   }
   function updateHUD(n){
     [...dotsEl.children].forEach((d,i)=>d.classList.toggle('on',i===n));
@@ -171,7 +246,7 @@
   function startExperience(){
     scenes[0].classList.add('active','enter-zoom');
     void scenes[0].offsetWidth; scenes[0].classList.remove('enter-zoom');
-    updateHUD(0); checkOrient();
+    updateHUD(0); checkOrient(); prepWipes(); playScene(0);
   }
   document.getElementById('enterBtn').addEventListener("click", async ()=>{
     await requestAppFullscreen();
