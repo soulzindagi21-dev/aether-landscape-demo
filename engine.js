@@ -342,12 +342,12 @@
        than popping in the instant the entry gate disappears */
     const blackout=document.getElementById('blackout');
     blackout.classList.add('show');
-    await new Promise(r=>setTimeout(r,700));
+    await new Promise(r=>setTimeout(r,900)); /* .8s fade-to-black + settle */
     hideEntryOverlay(); startExperience();
     document.getElementById('app').classList.add('revealed');
     if(audio) setPlaying(true);
     await new Promise(r=>setTimeout(r,60));
-    blackout.classList.remove('show');
+    blackout.classList.remove('show'); /* slow 2s fade-in from black */
   });
   document.addEventListener("fullscreenchange",()=>{ console.log("fullscreenchange:",document.fullscreenElement); });
   document.addEventListener("fullscreenerror",e=>{ console.warn("fullscreenerror:",e); });

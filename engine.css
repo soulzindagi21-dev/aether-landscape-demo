@@ -49,8 +49,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 
 /* ---------- cinematic black hand-off between entry gate and homepage ---------- */
 #blackout{position:fixed;inset:0;z-index:120;background:#000;opacity:0;pointer-events:none;
-  transition:opacity .7s ease}
-#blackout.show{opacity:1;pointer-events:auto}
+  transition:opacity 2s ease} /* base transition = the slow 2s fade-IN from black */
+#blackout.show{opacity:1;pointer-events:auto;transition:opacity .8s ease} /* quicker fade TO black */
 
 /* ---------- loader ---------- */
 #loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;
@@ -109,12 +109,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   display:flex;flex-direction:column;justify-content:center;
   padding:clamp(20px,5vh,48px) clamp(28px,7vw,90px)}
 
-/* depth text reveal */
-.rise{opacity:0;transform:translateY(26px) translateZ(0);
-  animation:rise .9s var(--ease) forwards}
+/* soft text reveal — pure opacity fade (no movement, positions never change),
+   graduated so the eyebrow/title settle over 2s and the lede/CTA over 3s */
+.rise{opacity:0;animation:softAppear 2s ease forwards}
 .scene.active .rise{animation-play-state:running}
-.d1{animation-delay:.15s}.d2{animation-delay:.32s}.d3{animation-delay:.5s}.d4{animation-delay:.68s}
-@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:.2s}.d2{animation-delay:.5s}
+.d3{animation-delay:.85s;animation-duration:3s}.d4{animation-delay:1.15s;animation-duration:3s}
+@keyframes softAppear{to{opacity:1}}
 
 .eyebrow{font-size:clamp(10px,1.6vw,12px);letter-spacing:.42em;text-transform:uppercase;
   color:var(--accent);margin-bottom:14px}
@@ -183,7 +184,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
    piece fades in on its own beat (opacity only — no position/transform change) */
 .hud{position:absolute;z-index:15;pointer-events:none;opacity:0}
 .hud *{pointer-events:auto}
-#app.revealed .hud{animation:hudFade .7s var(--ease) forwards}
+#app.revealed .hud{animation:hudFade 1.8s ease forwards}
 #app.revealed .brand-tag{animation-delay:.1s}
 #app.revealed .dots{animation-delay:.28s}
 #app.revealed .ctrls{animation-delay:.46s}
@@ -233,6 +234,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001s!important;transition-duration:.15s!important}
   .orb,.grain{animation:none!important}
+  /* the cinematic entrance is a pure opacity fade (no movement), which isn't
+     the kind of motion this setting guards against — keep its intended timing
+     so the slow reveal still reads as designed even with reduced-motion on */
+  #blackout{transition-duration:2s!important}
+  #blackout.show{transition-duration:.8s!important}
+  .rise{animation-duration:2s!important}
+  .d3,.d4{animation-duration:3s!important}
+  #app.revealed .hud{animation-duration:1.8s!important}
 }
 /* short landscape phones: tighten type */
 @media (max-height:430px){
