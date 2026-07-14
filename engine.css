@@ -384,6 +384,17 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .layout-center .title-img img{object-position:center}
 .layout-right .title-img{margin-left:auto}
 .layout-right .title-img img{object-position:right center}
+/* animated logotype: transparent WebM laid over the (now hidden) PNG, which
+   stays in the DOM to size the box and to fall back on browsers without
+   VP9-alpha support. The clip has its own baked motion, so the CSS sheen is
+   suppressed to avoid a competing highlight. */
+.title-vid{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:contain;object-position:left center;
+  filter:drop-shadow(0 0 30px rgba(225,29,72,.35))}
+.layout-center .title-vid{object-position:center}
+.layout-right .title-vid{object-position:right center}
+.title-img.has-vid img{opacity:0}
+.title-img.has-vid::after{display:none}
 @keyframes logoBreath{
   0%,100%{filter:drop-shadow(0 0 22px rgba(225,29,72,.28));transform:translateY(0)}
   50%{filter:drop-shadow(0 0 44px rgba(225,29,72,.5));transform:translateY(-4px)}

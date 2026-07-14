@@ -14,6 +14,10 @@
   /* a bare DEMO.audio (no visible player) still works for any theme; DEMO.player
      additionally renders a transport UI, themed per-page via CSS variables */
   const PLAYER = DEMO.player || (DEMO.audio ? {tracks:[{title:BRAND, src:DEMO.audio}]} : null);
+  /* VP9-alpha WebM plays in Chrome/Edge/Firefox/Android but not Safari/iOS —
+     gate animated logotypes on it so unsupported browsers keep the static PNG */
+  const supportsWebmAlpha=(function(){const v=document.createElement('video');
+    return !!(v.canPlayType && v.canPlayType('video/webm; codecs="vp9"'));})();
 
   /* ---------- inject shared shell markup ---------- */
   document.body.insertAdjacentHTML('afterbegin', `
@@ -99,8 +103,9 @@
       const attr=c.href?`data-href="${c.href}"`:c.modal?`data-modal="${c.modal}"`:`data-go="${c.go}"`;
       return `<button class="${cls}" ${attr}>${c.label}<span class="arr">→</span></button>`;
     }).join('');
+    const useTitleVid = s.titleVideo && supportsWebmAlpha;
     const titleHtml = s.titleImage
-      ? `<div class="title-img rise d2" style="--logo-mask:url('${s.titleImage}')"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}"></div>`
+      ? `<div class="title-img rise d2${useTitleVid?' has-vid':''}" style="--logo-mask:url('${s.titleImage}')"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}">${useTitleVid?`<video class="title-vid" autoplay muted loop playsinline preload="auto"><source src="${s.titleVideo}" type="video/webm"></video>`:''}</div>`
       : `<h1 class="title${s.titleClass?' '+s.titleClass:''} rise d2">${s.title||''}</h1>`;
     el.innerHTML=`${media}${spots}<div class="wrap">
       <div class="eyebrow rise d1">${s.eyebrow||''}</div>
