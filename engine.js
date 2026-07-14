@@ -11,9 +11,13 @@
   const SCENES = DEMO.scenes || [];
   const MODALS = DEMO.modals || {};
   const HOME_HREF = DEMO.homeHref || "index.html";
+  /* a bare DEMO.audio (no visible player) still works for any theme; DEMO.player
+     additionally renders a transport UI, themed per-page via CSS variables */
+  const PLAYER = DEMO.player || (DEMO.audio ? {tracks:[{title:BRAND, src:DEMO.audio}]} : null);
 
   /* ---------- inject shared shell markup ---------- */
   document.body.insertAdjacentHTML('afterbegin', `
+    <div id="blackout"></div>
     <div id="loader"><div style="text-align:center">
       <div class="load-mark" id="loadMark">${BRAND}</div>
       <div class="load-bar"><i></i></div>
@@ -56,6 +60,14 @@
         <button class="ic" id="homeBtn" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
       </div>
       <div class="hud scene-count" id="sceneCount"><b>01</b> / 04</div>
+      ${PLAYER ? `<div class="hud player" id="player">
+        <button class="p-play" id="pPlay" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <div class="p-body">
+          <div class="p-track" id="pTrack"></div>
+          <input class="p-seek" id="pSeek" type="range" min="0" max="100" value="0" step="0.1">
+        </div>
+        <div class="p-time" id="pTime">0:00</div>
+      </div>` : ''}
     </div>
   `);
 
@@ -64,9 +76,9 @@
     modal=document.getElementById('modal'), mTitle=document.getElementById('mTitle'),
     mTabs=document.getElementById('mTabs'), mBody=document.getElementById('mBody'),
     countEl=document.getElementById('sceneCount');
-  let current=0, busy=false, soundOn=false;
-  const audio = DEMO.audio ? new Audio(DEMO.audio) : null;
-  if(audio){ audio.loop=true; audio.preload='auto'; }
+  let current=0, busy=false, soundOn=false, trackIdx=0;
+  const audio = PLAYER ? new Audio(PLAYER.tracks[0].src) : null;
+  if(audio){ audio.preload='auto'; if(!PLAYER.tracks || PLAYER.tracks.length<2) audio.loop=true; }
 
   SCENES.forEach((s,i)=>{
     const el=document.createElement('section');
@@ -241,8 +253,49 @@
   document.getElementById('homeBtn').onclick=()=>{closeModal();goTo(0);};
   document.getElementById('backBtn').onclick=()=>{ location.href=HOME_HREF; };
   const soundBtn=document.getElementById('soundBtn');
-  soundBtn.onclick=()=>{soundOn=!soundOn;soundBtn.classList.toggle('off',!soundOn);
-    if(audio){ if(soundOn) tryPlay(audio); else audio.pause(); }};
+  function setPlaying(on){
+    soundOn=on; soundBtn.classList.toggle('off',!soundOn);
+    if(pPlayBtn) pPlayBtn.classList.toggle('paused',soundOn);
+    if(pPlayBtn) pPlayBtn.innerHTML = soundOn
+      ? '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>'
+      : '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+    if(audio){ if(soundOn) tryPlay(audio); else audio.pause(); }
+  }
+  soundBtn.onclick=()=>setPlaying(!soundOn);
+
+  /* ---------- basic digital track player (only when PLAYER is configured) ---------- */
+  const pPlayBtn=document.getElementById('pPlay'), pTrackEl=document.getElementById('pTrack'),
+    pSeek=document.getElementById('pSeek'), pTimeEl=document.getElementById('pTime');
+  function fmtTime(s){
+    if(!isFinite(s)||s<0) return "0:00";
+    const m=Math.floor(s/60), sec=Math.floor(s%60);
+    return m+":"+String(sec).padStart(2,'0');
+  }
+  function loadTrack(i){
+    if(!PLAYER) return;
+    trackIdx=(i+PLAYER.tracks.length)%PLAYER.tracks.length;
+    const t=PLAYER.tracks[trackIdx];
+    audio.src=t.src;
+    if(pTrackEl) pTrackEl.textContent=t.title||BRAND;
+  }
+  if(PLAYER){
+    loadTrack(0);
+    audio.addEventListener('timeupdate',()=>{
+      if(pSeek && !pSeek.dataset.dragging) pSeek.value = audio.duration ? (audio.currentTime/audio.duration*100) : 0;
+      if(pTimeEl) pTimeEl.textContent = fmtTime(audio.currentTime);
+    });
+    audio.addEventListener('ended',()=>{
+      if(PLAYER.tracks.length>1){ loadTrack(trackIdx+1); if(soundOn) tryPlay(audio); }
+    });
+    if(pPlayBtn) pPlayBtn.onclick=()=>setPlaying(!soundOn);
+    if(pSeek){
+      pSeek.addEventListener('input',()=>{ pSeek.dataset.dragging='1'; });
+      pSeek.addEventListener('change',()=>{
+        if(audio.duration) audio.currentTime=(pSeek.value/100)*audio.duration;
+        delete pSeek.dataset.dragging;
+      });
+    }
+  }
 
   addEventListener('keydown',e=>{
     if(e.key==='Escape'){modal.classList.contains('show')?closeModal():goTo(0);}
@@ -284,8 +337,17 @@
     await requestAppFullscreen();
     try{ await screen.orientation?.lock?.("landscape"); }
     catch(error){ console.warn("Orientation lock unavailable:",error); }
+    /* cinematic hand-off: fade to black, assemble the homepage underneath while
+       hidden, then fade the black away so everything reveals gracefully rather
+       than popping in the instant the entry gate disappears */
+    const blackout=document.getElementById('blackout');
+    blackout.classList.add('show');
+    await new Promise(r=>setTimeout(r,700));
     hideEntryOverlay(); startExperience();
-    if(audio){ soundOn=true; soundBtn.classList.remove('off'); tryPlay(audio); }
+    document.getElementById('app').classList.add('revealed');
+    if(audio) setPlaying(true);
+    await new Promise(r=>setTimeout(r,60));
+    blackout.classList.remove('show');
   });
   document.addEventListener("fullscreenchange",()=>{ console.log("fullscreenchange:",document.fullscreenElement); });
   document.addEventListener("fullscreenerror",e=>{ console.warn("fullscreenerror:",e); });

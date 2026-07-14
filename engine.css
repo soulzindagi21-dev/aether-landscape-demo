@@ -47,6 +47,11 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 @keyframes drift2{to{transform:translate3d(-5vmax,-6vmax,0) scale(1.2)}}
 @keyframes grain{0%{transform:translate(0,0)}100%{transform:translate(8%,6%)}}
 
+/* ---------- cinematic black hand-off between entry gate and homepage ---------- */
+#blackout{position:fixed;inset:0;z-index:120;background:#000;opacity:0;pointer-events:none;
+  transition:opacity .7s ease}
+#blackout.show{opacity:1;pointer-events:auto}
+
 /* ---------- loader ---------- */
 #loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;
   background:var(--bg);transition:opacity .8s var(--ease)}
@@ -174,9 +179,17 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .spec b{font-weight:400;font-size:14px}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
 
-/* HUD: nav dots + controls */
-.hud{position:absolute;z-index:15;pointer-events:none}
+/* HUD: nav dots + controls — hidden until the post-blackout reveal, then each
+   piece fades in on its own beat (opacity only — no position/transform change) */
+.hud{position:absolute;z-index:15;pointer-events:none;opacity:0}
 .hud *{pointer-events:auto}
+#app.revealed .hud{animation:hudFade .7s var(--ease) forwards}
+#app.revealed .brand-tag{animation-delay:.1s}
+#app.revealed .dots{animation-delay:.28s}
+#app.revealed .ctrls{animation-delay:.46s}
+#app.revealed .scene-count{animation-delay:.62s}
+#app.revealed .player{animation-delay:.78s}
+@keyframes hudFade{to{opacity:1}}
 .dots{left:clamp(20px,5vw,44px);top:50%;transform:translateY(-50%);
   display:flex;flex-direction:column;gap:14px}
 .dots button{width:9px;height:9px;border-radius:50%;border:1px solid var(--line);
@@ -194,6 +207,28 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .scene-count{right:clamp(20px,5vw,44px);bottom:clamp(18px,4vh,30px);
   font-size:11px;letter-spacing:.2em;color:var(--muted)}
 .scene-count b{color:var(--ink);font-weight:400}
+
+/* basic digital track player — themed via the page's own CSS variables */
+.player{left:50%;bottom:clamp(18px,4vh,30px);transform:translateX(-50%);
+  display:flex;align-items:center;gap:12px;
+  background:rgba(0,0,0,.35);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:30px;
+  padding:8px 20px 8px 8px;min-width:240px;max-width:360px}
+.p-play{width:34px;height:34px;border-radius:50%;flex:none;
+  background:var(--accent);display:grid;place-items:center;transition:.3s var(--ease)}
+.p-play:hover{filter:brightness(1.12)}
+.p-play svg{width:15px;height:15px;fill:#1a1206}
+.p-body{flex:1;min-width:0}
+.p-track{font-size:11px;letter-spacing:.06em;color:var(--ink);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
+.p-seek{-webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:3px;
+  background:var(--line);outline:none;display:block}
+.p-seek::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;
+  background:var(--accent);cursor:pointer}
+.p-seek::-moz-range-thumb{width:11px;height:11px;border-radius:50%;border:none;
+  background:var(--accent);cursor:pointer}
+.p-time{font-size:10px;color:var(--muted);letter-spacing:.05em;flex:none}
+@media (max-height:430px){.player{bottom:14px;min-width:200px;padding:6px 16px 6px 6px}}
 
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001s!important;transition-duration:.15s!important}
