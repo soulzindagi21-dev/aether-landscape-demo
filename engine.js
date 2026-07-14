@@ -88,7 +88,7 @@
       return `<button class="${cls}" ${attr}>${c.label}<span class="arr">→</span></button>`;
     }).join('');
     const titleHtml = s.titleImage
-      ? `<div class="title-img rise d2"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}"></div>`
+      ? `<div class="title-img rise d2" style="--logo-mask:url('${s.titleImage}')"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}"></div>`
       : `<h1 class="title${s.titleClass?' '+s.titleClass:''} rise d2">${s.title||''}</h1>`;
     el.innerHTML=`${media}${spots}<div class="wrap">
       <div class="eyebrow rise d1">${s.eyebrow||''}</div>

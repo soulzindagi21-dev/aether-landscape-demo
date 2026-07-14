@@ -344,11 +344,17 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   0%,100%{filter:drop-shadow(0 0 22px rgba(225,29,72,.28));transform:translateY(0)}
   50%{filter:drop-shadow(0 0 44px rgba(225,29,72,.5));transform:translateY(-4px)}
 }
-/* sheen sweep across the logotype */
+/* sheen sweep across the logotype — masked to the logo's own alpha so the
+   light only glints on actual letterforms, never across the transparent
+   gaps between/inside them (a flat rectangular highlight there gave away
+   that this was an image plane, not solid 3D type) */
 .title-img::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(115deg,transparent 42%,rgba(255,245,225,.32) 50%,transparent 58%);
   background-size:280% 100%;background-position:120% 0;
   mix-blend-mode:screen;
+  -webkit-mask-image:var(--logo-mask);mask-image:var(--logo-mask);
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   animation:sheen 6s var(--ease) infinite}
 @keyframes sheen{0%,55%{background-position:120% 0}85%,100%{background-position:-60% 0}}
 @media (prefers-reduced-motion:reduce){
