@@ -293,10 +293,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .layout-lower .title{font-size:clamp(26px,6vw,64px)}
 .layout-lower .lede{max-width:min(60ch,70%)}
 
-.layout-split .wrap{width:46%;min-width:300px;height:100%;margin-left:auto;
-  background:linear-gradient(90deg,transparent 0%,rgba(4,5,10,.88) 18%,rgba(4,5,10,.94) 100%);
-  padding-left:clamp(30px,5vw,70px)}
-.layout-split.scene .scene-media{width:60%;right:auto}
+.layout-split .wrap{width:46%;min-width:300px;height:100%;margin-right:auto;
+  background:linear-gradient(270deg,transparent 0%,rgba(4,5,10,.88) 18%,rgba(4,5,10,.94) 100%);
+  padding-right:clamp(30px,5vw,70px)}
+.layout-split.scene .scene-media{width:60%;left:auto}
 .layout-split .scene-media .plate,.layout-split .scene-media video{object-position:center}
 
 .layout-minimal .wrap{align-items:center;justify-content:flex-end;text-align:center;
