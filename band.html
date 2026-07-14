@@ -34,14 +34,22 @@ window.DEMO = {
   entryTagline:"Live Album Experience",
   homeHref:"index.html",
   wipes:["assets/band-wipe.mp4"],
+  audio:"assets/band-hero-score.mp3",
   scenes:[
+    { id:"hero", trans:"zoom", layout:"split",
+      loop:"assets/band-homepage-hero.mp4", poster:"assets/band-homepage-hero-poster.jpg",
+      eyebrow:"The Ash & Gold Sessions",
+      title:'Where The <b>Night</b><br>Never Ends',
+      lede:"Recorded live inside a candlelit cathedral — four voices, one room, no safety net.",
+      ctas:[{label:"Step Inside",style:"solid",go:1}]
+    },
     { id:"intro", trans:"zoom", layout:"left",
       loop:"assets/band-intro-loop.mp4", poster:"assets/band-intro-loop-poster.jpg",
       eyebrow:"New Album · Out Now",
       titleImage:"assets/nv-logotype.png", titleAlt:"Nocturne Velvet",
       title:'Nocturne<br><b>Velvet</b>',
       lede:"Five nights. One record cut live to tape. A dark-romantic rock record recorded in a converted cathedral.",
-      ctas:[{label:"Enter the Record",style:"solid",go:1},{label:"Skip to Tour",go:3}]
+      ctas:[{label:"Enter the Record",style:"solid",go:2},{label:"Skip to Tour",go:4}]
     },
     { id:"story", trans:"pan", layout:"lower",
       loop:"assets/band-story-loop.mp4", poster:"assets/band-story-loop-poster.jpg",
@@ -49,7 +57,7 @@ window.DEMO = {
       title:'Recorded<br>in the <b>Dark</b>',
       lede:"Tap the stage to explore the album, the tour, and the story behind the band.",
       bg:"radial-gradient(90% 90% at 70% 20%,rgba(225,29,72,.22),transparent 55%),radial-gradient(80% 80% at 20% 90%,rgba(162,28,175,.22),transparent 60%)",
-      ctas:[{label:"Continue",style:"solid",go:2}],
+      ctas:[{label:"Continue",style:"solid",go:3}],
       hotspots:[
         {x:"70%",y:"36%",label:"The Album",modal:"album"},
         {x:"28%",y:"62%",label:"Tour Dates",modal:"tour"},
@@ -62,7 +70,7 @@ window.DEMO = {
       titleClass:"metal",
       title:'Four. <b>Loud.</b><br>Relentless.',
       lede:"A band built for the room, not the algorithm. Press has called them the loudest quiet band in the country.",
-      ctas:[{label:"Press & Highlights",style:"solid",modal:"press"},{label:"Next",go:3}]
+      ctas:[{label:"Press & Highlights",style:"solid",modal:"press"},{label:"Next",go:4}]
     },
     { id:"cta", trans:"zoom", layout:"minimal",
       loop:"assets/band-cta-loop.mp4", poster:"assets/band-cta-loop-poster.jpg",

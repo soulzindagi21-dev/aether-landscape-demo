@@ -64,7 +64,9 @@
     modal=document.getElementById('modal'), mTitle=document.getElementById('mTitle'),
     mTabs=document.getElementById('mTabs'), mBody=document.getElementById('mBody'),
     countEl=document.getElementById('sceneCount');
-  let current=0, busy=false, soundOn=false, audio=null;
+  let current=0, busy=false, soundOn=false;
+  const audio = DEMO.audio ? new Audio(DEMO.audio) : null;
+  if(audio){ audio.loop=true; audio.preload='auto'; }
 
   SCENES.forEach((s,i)=>{
     const el=document.createElement('section');
@@ -240,7 +242,7 @@
   document.getElementById('backBtn').onclick=()=>{ location.href=HOME_HREF; };
   const soundBtn=document.getElementById('soundBtn');
   soundBtn.onclick=()=>{soundOn=!soundOn;soundBtn.classList.toggle('off',!soundOn);
-    /* hook real audio here: if(soundOn) audio.play(); else audio.pause(); */};
+    if(audio){ if(soundOn) tryPlay(audio); else audio.pause(); }};
 
   addEventListener('keydown',e=>{
     if(e.key==='Escape'){modal.classList.contains('show')?closeModal():goTo(0);}
@@ -283,6 +285,7 @@
     try{ await screen.orientation?.lock?.("landscape"); }
     catch(error){ console.warn("Orientation lock unavailable:",error); }
     hideEntryOverlay(); startExperience();
+    if(audio){ soundOn=true; soundBtn.classList.remove('off'); tryPlay(audio); }
   });
   document.addEventListener("fullscreenchange",()=>{ console.log("fullscreenchange:",document.fullscreenElement); });
   document.addEventListener("fullscreenerror",e=>{ console.warn("fullscreenerror:",e); });
