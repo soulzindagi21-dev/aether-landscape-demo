@@ -101,41 +101,71 @@
 
   /* ---------- loop video manager: one active decoder at a time ---------- */
   const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let activeVideoScene = 0; /* which scene's video should currently be playing */
+  function tryPlay(v){
+    if(!v) return;
+    const p=v.play();
+    if(p && p.catch) p.catch(err=>{ console.warn("video play() blocked:",err && err.name, err && err.message); });
+  }
   function ensureLoopVideo(i){
-    const s=SCENES[i]; if(!s||!s.loop||reducedMotion) return null;
+    const s=SCENES[i]; if(!s||!s.loop) return null;
     const holder=scenes[i].querySelector('.scene-media'); if(!holder) return null;
     let v=holder.querySelector('video');
     if(!v){
       v=document.createElement('video');
-      v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline','');
+      /* muted MUST be set as attribute for desktop Chrome autoplay policy */
+      v.muted=true; v.defaultMuted=true; v.setAttribute('muted','');
+      v.loop=true; v.playsInline=true; v.setAttribute('playsinline','');
+      v.setAttribute('autoplay','');
       v.preload='auto'; v.src=s.loop;
       if(s.poster) v.poster=s.poster;
-      v.addEventListener('canplay',()=>v.classList.add('ready'),{once:true});
+      v.addEventListener('canplay',()=>{
+        v.classList.add('ready');
+        if(i===activeVideoScene) tryPlay(v);
+      });
+      v.addEventListener('loadeddata',()=>{
+        if(i===activeVideoScene) tryPlay(v); /* second retry point */
+      });
       v.addEventListener('error',()=>{ v.remove(); },{once:true}); /* plate stays */
       holder.insertBefore(v, holder.querySelector('.tint'));
     }
+    /* if this video is already buffered (e.g. warmed earlier), don't wait on an
+       event that may already have fired — try immediately */
+    if(v.readyState>=3){ v.classList.add('ready'); if(i===activeVideoScene) tryPlay(v); }
     return v;
   }
   function playScene(i){
+    activeVideoScene = i;
     scenes.forEach((sc,j)=>{
       const v=sc.querySelector('.scene-media video');
       if(v && j!==i){ v.pause(); }
     });
-    const v=ensureLoopVideo(i);
-    if(v){ const p=v.play(); if(p) p.catch(()=>{}); }
+    tryPlay(ensureLoopVideo(i));
     /* warm the next scene's video so the swap is instant */
     if(SCENES[i+1]&&SCENES[i+1].loop) ensureLoopVideo(i+1);
   }
+  /* desktop fallback: if autoplay was blocked, the first click/keypress resumes it */
+  function resumeActiveVideo(){
+    const v=scenes[activeVideoScene]?.querySelector('.scene-media video');
+    if(v && v.paused) tryPlay(v);
+  }
+  document.addEventListener('click', resumeActiveVideo);
+  document.addEventListener('keydown', resumeActiveVideo);
 
   /* ---------- wipe transition layer ---------- */
   const wipeEl=document.getElementById('wipe');
   const WIPES=(DEMO.wipes||[]).slice();
   let wipeIdx=0, wipeVideos=[];
   function prepWipes(){
+    /* wipes are fast full-screen video overlays — unlike the ambient
+       background loop, this is the kind of abrupt motion prefers-reduced-motion
+       is meant to guard against, so it stays gated. Plain CSS transitions
+       still run underneath as the fallback. */
     if(reducedMotion) return;
     WIPES.forEach(src=>{
       const v=document.createElement('video');
-      v.muted=true; v.playsInline=true; v.setAttribute('playsinline','');
+      v.muted=true; v.defaultMuted=true; v.setAttribute('muted','');
+      v.playsInline=true; v.setAttribute('playsinline','');
       v.preload='auto'; v.src=src; v.style.display='none';
       v.addEventListener('error',()=>{ const k=wipeVideos.indexOf(v); if(k>-1)wipeVideos.splice(k,1); v.remove(); },{once:true});
       wipeEl.appendChild(v); wipeVideos.push(v);
