@@ -327,8 +327,12 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .spin360{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;
   cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .spin360.dragging{cursor:grabbing}
-.spin360 img{max-width:76%;max-height:68%;object-fit:contain;pointer-events:none;
-  filter:drop-shadow(0 30px 60px rgba(0,0,0,.5))}
+.spin360 img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+/* the text/CTA layer sits above the viewer for legibility, but must let clicks
+   and drags pass through its empty space to reach the viewer beneath it —
+   only its actual content stays clickable */
+.spin360 ~ .wrap{pointer-events:none}
+.spin360 ~ .wrap *{pointer-events:auto}
 .spin-hint{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);
   font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
   background:rgba(0,0,0,.4);padding:8px 18px;border-radius:20px;border:1px solid var(--line);
