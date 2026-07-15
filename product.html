@@ -40,6 +40,7 @@ window.DEMO = {
   brand:"AURA ONE",
   entryTagline:"Product Launch · 2026",
   homeHref:"index.html",
+  tryOn:{ endpoint:"/api/try-it-on" },
   scenes:[
     { id:"intro", trans:"zoom", layout:"left",
       loop:"assets/product-homepage-hero.mp4", poster:"assets/product-homepage-hero-poster.jpg",
@@ -78,7 +79,8 @@ window.DEMO = {
       title:'Hear the<br><b>Difference</b>',
       lede:"Preorder ships in 14 days. Free returns for 30.",
       ctas:[
-        {label:"Buy — ₹34,900",style:"solid",href:"#buy"},
+        {label:"Try It On",style:"solid",modal:"tryon"},
+        {label:"Buy — ₹34,900",href:"#buy"},
         {label:"Preorder",href:"#preorder"},
         {label:"Watch Demo",href:"https://youtube.com"},
         {label:"Compare",modal:"compare"},

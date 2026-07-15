@@ -322,11 +322,69 @@
   });
 
   function openModal(key){
+    if(key==='tryon' && DEMO.tryOn){ openTryOn(); return; }
     const m=MODALS[key]; if(!m)return;
     mTitle.textContent=m.title;
     mTabs.innerHTML=m.tabs.map((t,i)=>`<button class="tab${i?'':' active'}" data-t="${i}">${t.name}</button>`).join('');
     mBody.innerHTML=m.tabs.map((t,i)=>`<div class="panel${i?'':' active'}" data-p="${i}">${t.html}</div>`).join('');
     modal.classList.add('show');
+  }
+
+  /* ---------- Try It On: live camera capture -> AI-generated lifestyle preview ---------- */
+  function openTryOn(){
+    mTitle.textContent='Try It On';
+    mTabs.innerHTML='';
+    mBody.innerHTML=`<div class="tryon">
+      <p class="tryon-note">Take a live photo of yourself right now to see it on you. We only accept a fresh camera capture, not a photo from your gallery.</p>
+      <label class="tryon-upload" id="tryonUploadLabel">
+        <input type="file" accept="image/*" capture="user" id="tryonFile">
+        <span id="tryonUploadText">Take a Photo</span>
+      </label>
+      <label class="tryon-consent">
+        <input type="checkbox" id="tryonConsent">
+        <span>I confirm this is a live photo of myself, taken just now, and I consent to an AI-generated preview image being created from it. This photo is used only to generate this preview and is not stored afterward.</span>
+      </label>
+      <button class="btn solid tryon-submit" id="tryonSubmit" disabled>Generate My Preview</button>
+      <p class="tryon-status" id="tryonStatus"></p>
+      <div class="tryon-result" id="tryonResult"></div>
+    </div>`;
+    modal.classList.add('show');
+    const fileInput=document.getElementById('tryonFile');
+    const uploadText=document.getElementById('tryonUploadText');
+    const consent=document.getElementById('tryonConsent');
+    const submitBtn=document.getElementById('tryonSubmit');
+    const statusEl=document.getElementById('tryonStatus');
+    const resultEl=document.getElementById('tryonResult');
+    let photoDataUrl=null;
+    function updateSubmit(){ submitBtn.disabled=!(photoDataUrl && consent.checked); }
+    fileInput.addEventListener('change',()=>{
+      const f=fileInput.files[0]; if(!f) return;
+      uploadText.textContent='Photo captured ✓';
+      const reader=new FileReader();
+      reader.onload=()=>{ photoDataUrl=reader.result; updateSubmit(); };
+      reader.readAsDataURL(f);
+    });
+    consent.addEventListener('change',updateSubmit);
+    submitBtn.addEventListener('click',async()=>{
+      if(!photoDataUrl) return;
+      submitBtn.disabled=true;
+      statusEl.textContent='Generating your preview — this can take up to 30 seconds…';
+      resultEl.innerHTML='';
+      try{
+        const r=await fetch(DEMO.tryOn.endpoint,{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({image:photoDataUrl})
+        });
+        const data=await r.json();
+        if(!r.ok || !data.image) throw new Error(data.error||('Request failed: '+r.status));
+        resultEl.innerHTML=`<img src="${data.image}" alt="Your AURA ONE preview">`;
+        statusEl.textContent='Here’s your preview.';
+      }catch(err){
+        console.warn('try-it-on failed:',err);
+        statusEl.textContent='Something went wrong generating your preview. Please try again.';
+      }
+      submitBtn.disabled=false;
+    });
   }
   function closeModal(){modal.classList.remove('show');}
   mTabs.addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;

@@ -172,7 +172,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .tab{padding:8px 16px;border-radius:20px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--muted);border:1px solid transparent;transition:.3s var(--ease)}
 .tab.active{color:var(--ink);border-color:var(--line);background:var(--glass)}
-.tab-body{padding:20px 26px 26px;overflow:hidden;flex:1}
+.tab-body{padding:20px 26px 26px;overflow-y:auto;flex:1}
 .panel{display:none;animation:fade .5s var(--ease)}
 .panel.active{display:block}
 .panel p{color:var(--muted);font-size:14px;line-height:1.6;font-weight:300;max-width:60ch}
@@ -181,6 +181,22 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .spec span{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
 .spec b{font-weight:400;font-size:14px}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+
+/* Try It On — live camera capture, consent, generated preview */
+.tryon{display:flex;flex-direction:column;gap:16px}
+.tryon-note{color:var(--muted);font-size:13px;line-height:1.5;margin:0}
+.tryon-upload{display:flex;align-items:center;justify-content:center;
+  border:1px dashed var(--line-strong,var(--line));border-radius:10px;padding:22px;cursor:pointer;
+  font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);
+  transition:.3s var(--ease)}
+.tryon-upload:hover{border-color:var(--accent)}
+.tryon-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.tryon-consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--muted);line-height:1.5}
+.tryon-consent input{margin-top:3px;flex:none}
+.tryon-submit{align-self:flex-start}
+.tryon-submit:disabled{opacity:.4;pointer-events:none}
+.tryon-status{font-size:13px;color:var(--muted);margin:0;min-height:1.2em}
+.tryon-result img{width:100%;border-radius:10px;display:block}
 
 /* HUD: nav dots + controls — hidden until the post-blackout reveal, then each
    piece fades in on its own beat (opacity only — no position/transform change) */
