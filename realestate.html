@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+<meta name="theme-color" content="#0d0c0a" />
+<title>MERIDIAN HOUSE — Private Residence</title>
+<link rel="stylesheet" href="engine.css" />
+<style>
+/* THEME: LUXURY REAL ESTATE — warm stone, brass, architectural calm */
+:root{
+  --bg:#0d0c0a; --bg2:#1a1712; --ink:#f5f1e8; --muted:#a89a86;
+  --accent:#b08d57; --accent2:#6b7c6a; --glass:rgba(255,255,255,.045);
+  --line:rgba(255,255,255,.13);
+  --font:"Optima","Segoe UI",Helvetica,Arial,sans-serif;
+}
+.title{font-weight:200!important;letter-spacing:-.01em!important}
+.title b{font-weight:500!important}
+.eyebrow{letter-spacing:.5em!important}
+.btn{border-radius:2px!important;letter-spacing:.18em!important}
+.entry-mark{font-weight:200;letter-spacing:.4em}
+.env{background:radial-gradient(120% 90% at 60% 0%,#241f14 0%,var(--bg2) 45%,var(--bg) 100%)!important}
+.orb.a{background:radial-gradient(circle,var(--accent) 0%,transparent 62%);opacity:.3}
+.orb.b{background:radial-gradient(circle,var(--accent2) 0%,transparent 62%);opacity:.28}
+.orb.c{background:radial-gradient(circle,#e8ddc4 0%,transparent 58%);opacity:.16}
+.grain{opacity:.035!important}
+/* thin architectural frame line on the tour scene */
+.arch-frame{position:absolute;inset:clamp(20px,5vh,50px) clamp(28px,7vw,90px);
+  border:1px solid rgba(176,141,87,.25);z-index:1;pointer-events:none}
+.arch-frame::before{content:"MERIDIAN HOUSE — PRIVATE VIEWING";position:absolute;top:-9px;left:20px;
+  background:var(--bg);padding:0 10px;font-family:"Helvetica Neue",sans-serif;
+  font-size:9px;letter-spacing:.35em;color:var(--accent)}
+</style>
+</head>
+<body>
+<script>
+function spec(rows){return '<div class="spec">'+rows.map(function(r){return '<div><span>'+r[0]+'</span><b>'+r[1]+'</b></div>';}).join('')+'</div>';}
+window.DEMO = {
+  brand:"MERIDIAN HOUSE",
+  entryTagline:"A Private Residence",
+  homeHref:"index.html",
+  scenes:[
+    { id:"intro", trans:"zoom", layout:"left",
+      eyebrow:"By Private Viewing",
+      title:'Meridian<br><b>House</b>',
+      lede:"Seven thousand square feet of glass, stone, and light, set above the city. A residence built for the way you actually live.",
+      ctas:[{label:"Explore the Residence",style:"solid",go:1},{label:"Schedule a Viewing",go:3}]
+    },
+    { id:"tour", trans:"pan", layout:"lower",
+      eyebrow:"Inside Meridian House",
+      title:'Where Every<br>Room Has A <b>View</b>',
+      lede:"Tap to explore the great room, the primary suite, and the kitchen.",
+      bg:"radial-gradient(90% 90% at 70% 20%,rgba(176,141,87,.16),transparent 55%),radial-gradient(80% 80% at 20% 90%,rgba(107,124,106,.16),transparent 60%)",
+      ctas:[{label:"Continue",style:"solid",go:2}],
+      hotspots:[
+        {x:"68%",y:"34%",label:"The Great Room",modal:"greatroom"},
+        {x:"30%",y:"64%",label:"Primary Suite",modal:"suite"},
+        {x:"82%",y:"70%",label:"The Kitchen",modal:"kitchen"}
+      ]
+    },
+    { id:"amenities", trans:"mask", layout:"center",
+      eyebrow:"The Details",
+      title:'Built For <b>How</b><br>You Live',
+      lede:"6,800 square feet, four bedrooms, a private pool, and unobstructed views on three sides.",
+      ctas:[{label:"Full Specifications",style:"solid",modal:"specs"},{label:"Next",go:3}]
+    },
+    { id:"cta", trans:"zoom", layout:"minimal",
+      eyebrow:"Available Now",
+      title:'Come <b>See</b><br>It Yourself',
+      lede:"Private viewings by appointment. Serious inquiries only.",
+      ctas:[
+        {label:"Schedule a Viewing",style:"solid",href:"#schedule"},
+        {label:"Download Brochure",href:"#brochure"},
+        {label:"Floor Plans",modal:"floorplans"},
+        {label:"Contact Agent",modal:"agent"},
+        {label:"↺ Restart",go:0}
+      ]
+    }
+  ],
+  modals:{
+    greatroom:{title:"The Great Room",tabs:[
+      {name:"Overview",html:"<p>Twenty-two-foot ceilings, a fully retractable glass wall, and a limestone fireplace anchor the main living space. Swap this for real listing copy.</p>"},
+      {name:"Details",html:spec([["Ceiling Height","22 ft"],["Flooring","White oak"],["Glazing","Retractable, floor-to-ceiling"],["Fireplace","Limestone, gas"]])}
+    ]},
+    suite:{title:"Primary Suite",tabs:[
+      {name:"Overview",html:"<p>A private wing with its own terrace, dual walk-in closets, and a spa-style bath finished in book-matched marble.</p>"},
+      {name:"Details",html:spec([["Size","1,100 sq ft"],["Closets","Dual walk-in"],["Bath","Book-matched marble"],["Terrace","Private, 400 sq ft"]])}
+    ]},
+    kitchen:{title:"The Kitchen",tabs:[
+      {name:"Overview",html:"<p>A chef's kitchen built around a fourteen-foot waterfall island, fully integrated appliances, and a walk-in pantry.</p>"},
+      {name:"Details",html:spec([["Island","14 ft, waterfall stone"],["Appliances","Fully integrated"],["Pantry","Walk-in"],["Counters","Honed quartzite"]])}
+    ]},
+    specs:{title:"Specifications",tabs:[
+      {name:"Overview",html:"<p>Meridian House sits on 1.2 private acres with unobstructed views on three sides. Replace with real listing details.</p>"},
+      {name:"Property",html:spec([["Living Area","6,800 sq ft"],["Lot Size","1.2 acres"],["Bedrooms","4"],["Bathrooms","5.5"]])},
+      {name:"Features",html:spec([["Built","2024"],["Pool","Heated, saltwater"],["Garage","3-car, EV-ready"],["Climate","Zoned, geothermal"]])}
+    ]},
+    floorplans:{title:"Floor Plans",tabs:[
+      {name:"Levels",html:"<p>Three levels — main living, private suites, and a lower-level media and wellness floor. Attach real floor plan PDFs here.</p>"}
+    ]},
+    agent:{title:"Contact Agent",tabs:[
+      {name:"Reach us",html:"<p>listings@meridianhouse.example<br>+91 00000 00000<br>Private viewings by appointment only</p>"}
+    ]}
+  }
+};
+</script>
+<script src="engine.js"></script>
+</body>
+</html>

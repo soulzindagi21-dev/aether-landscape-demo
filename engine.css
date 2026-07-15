@@ -113,6 +113,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
    graduated so the eyebrow/title settle over 2s and the lede/CTA over 3s */
 .rise{opacity:0;animation:softAppear 2s ease forwards;animation-play-state:paused}
 .scene.active .rise{animation-play-state:running}
+/* index.html has no .scene/engine.js — its rise elements run immediately */
+.sel-wrap .rise{animation-play-state:running}
 .d1{animation-delay:.2s}.d2{animation-delay:.5s}
 .d3{animation-delay:.85s;animation-duration:3s}.d4{animation-delay:1.15s;animation-duration:3s}
 @keyframes softAppear{to{opacity:1}}
@@ -261,8 +263,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .sel-head h1 b{font-weight:600}
 .sel-head p{margin-top:14px;color:var(--muted);font-size:clamp(13px,1.9vw,16px);
   line-height:1.55;font-weight:300;max-width:56ch}
-.sel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2vw,22px);
-  max-width:1100px}
+.sel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:clamp(12px,2vw,22px);
+  max-width:1360px}
 .sel-card{position:relative;overflow:hidden;border-radius:18px;border:1px solid var(--line);
   min-height:clamp(150px,34vh,260px);padding:clamp(16px,2.4vw,26px);
   display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;
@@ -290,6 +292,9 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .art-model{background:
   radial-gradient(80% 70% at 25% 20%,#d8b48a 0%,transparent 55%),
   radial-gradient(70% 70% at 85% 95%,#7a6f66 0%,transparent 60%),#0c0a08}
+.art-realestate{background:
+  radial-gradient(85% 65% at 65% 15%,#b08d57 0%,transparent 55%),
+  radial-gradient(70% 70% at 15% 90%,#6b7c6a 0%,transparent 60%),#0d0c0a}
 @media (max-height:430px){
   .sel-head{margin-bottom:14px}
   .sel-head h1{font-size:clamp(24px,7vw,44px)}
