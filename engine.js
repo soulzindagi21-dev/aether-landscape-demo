@@ -215,12 +215,15 @@
     const doSwap=()=>{
       const from=scenes[current], to=scenes[n], t=SCENES[n].trans||'zoom';
       from.classList.add('leave-'+t); to.classList.add('enter-'+t);
+      /* reset the incoming scene's text reveal BEFORE it goes active (matters
+         on repeat visits, where .rise already sat at its finished opacity:1
+         from last time) — resetting after would flash the old state first */
+      to.querySelectorAll('.rise').forEach(r=>{r.style.animation='none';void r.offsetWidth;r.style.animation='';});
       void to.offsetWidth;
       to.classList.add('active'); from.classList.remove('active');
       updateHUD(n); playScene(n);
       setTimeout(()=>{
         from.className='scene'+(SCENES[+from.dataset.i].layout?' layout-'+SCENES[+from.dataset.i].layout:'');
-        to.querySelectorAll('.rise').forEach(r=>{r.style.animation='none';void r.offsetWidth;r.style.animation='';});
         to.classList.remove('enter-'+t);
         current=n; busy=false;
       },1000);

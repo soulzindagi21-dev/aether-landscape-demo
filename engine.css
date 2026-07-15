@@ -111,7 +111,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 
 /* soft text reveal — pure opacity fade (no movement, positions never change),
    graduated so the eyebrow/title settle over 2s and the lede/CTA over 3s */
-.rise{opacity:0;animation:softAppear 2s ease forwards}
+.rise{opacity:0;animation:softAppear 2s ease forwards;animation-play-state:paused}
 .scene.active .rise{animation-play-state:running}
 .d1{animation-delay:.2s}.d2{animation-delay:.5s}
 .d3{animation-delay:.85s;animation-duration:3s}.d4{animation-delay:1.15s;animation-duration:3s}
