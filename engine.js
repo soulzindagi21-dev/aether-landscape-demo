@@ -95,6 +95,16 @@
         <div class="plate" ${s.poster?`style="background-image:url('${s.poster}')"`:''}></div>
         <div class="tint"></div></div>`;
     }
+    const spinHtml = s.spin
+      ? `<div class="spin360"><img alt="Drag to rotate the product" draggable="false"><div class="spin-hint">← Drag to rotate →</div></div>` : '';
+    const spatialHtml = s.spatialDemo
+      ? `<div class="spatial-demo">
+          <button class="sd-play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+          <div class="sd-toggle">
+            <button class="sd-opt active" data-mode="flat">Flat</button>
+            <button class="sd-opt" data-mode="spatial">Spatial</button>
+          </div>
+        </div>` : '';
     const spots=(s.hotspots||[]).map(h=>
       `<button class="hotspot" style="left:${h.x};top:${h.y}" data-modal="${h.modal}" aria-label="${h.label}">
          <span class="ring"></span><span class="dot"></span><span class="lbl">${h.label}</span></button>`).join('');
@@ -107,7 +117,7 @@
     const titleHtml = s.titleImage
       ? `<div class="title-img rise d2${useTitleVid?' has-vid':''}" style="--logo-mask:url('${s.titleImage}')"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}">${useTitleVid?`<video class="title-vid" autoplay muted loop playsinline preload="auto"><source src="${s.titleVideo}" type="video/webm"></video>`:''}</div>`
       : `<h1 class="title${s.titleClass?' '+s.titleClass:''} rise d2">${s.title||''}</h1>`;
-    el.innerHTML=`${media}${spots}<div class="wrap">
+    el.innerHTML=`${media}${spinHtml}${spatialHtml}${spots}<div class="wrap">
       <div class="eyebrow rise d1">${s.eyebrow||''}</div>
       ${titleHtml}
       <p class="lede rise d3">${s.lede||''}</p>
@@ -162,6 +172,74 @@
     tryPlay(ensureLoopVideo(i));
     /* warm the next scene's video so the swap is instant */
     if(SCENES[i+1]&&SCENES[i+1].loop) ensureLoopVideo(i+1);
+    if(SCENES[i]&&SCENES[i].spin) ensureSpinViewer(i);
+    if(SCENES[i]&&SCENES[i].spatialDemo) ensureSpatialDemo(i);
+  }
+
+  /* ---------- 360 drag-to-rotate product viewer ---------- */
+  function ensureSpinViewer(i){
+    const s=SCENES[i]; if(!s||!s.spin) return null;
+    const holder=scenes[i].querySelector('.spin360'); if(!holder||holder.dataset.ready) return holder;
+    holder.dataset.ready='1';
+    const cfg=s.spin, count=cfg.count||0, pad=cfg.pad||2;
+    const frameSrc=(n)=> cfg.frames ? cfg.frames[n] : (cfg.base+String(n+1).padStart(pad,'0')+cfg.ext);
+    const img=holder.querySelector('img');
+    img.src=cfg.poster||(count?frameSrc(0):'');
+    const frames=[];
+    for(let n=0;n<count;n++){ const im=new Image(); im.src=frameSrc(n); frames.push(im); }
+    let current=0, dragging=false, startX=0, startFrame=0;
+    function setFrame(n){
+      if(!count) return;
+      current=((n%count)+count)%count;
+      const f=frames[current];
+      if(f && f.complete && f.naturalWidth) img.src=f.src;
+    }
+    function pos(e){ return e.touches?e.touches[0].clientX:e.clientX; }
+    function onDown(e){
+      dragging=true; startX=pos(e); startFrame=current;
+      holder.classList.add('dragging','hinted');
+    }
+    function onMove(e){
+      if(!dragging) return;
+      const dx=pos(e)-startX;
+      setFrame(startFrame-Math.round(dx/6));
+    }
+    function onUp(){ dragging=false; holder.classList.remove('dragging'); }
+    holder.addEventListener('pointerdown',onDown);
+    holder.addEventListener('pointermove',onMove);
+    window.addEventListener('pointerup',onUp);
+    holder.addEventListener('touchstart',onDown,{passive:true});
+    holder.addEventListener('touchmove',onMove,{passive:true});
+    holder.addEventListener('touchend',onUp);
+    holder.__setFrame=setFrame; /* exposed for testing */
+    return holder;
+  }
+
+  /* ---------- flat vs spatial audio A/B demo ---------- */
+  function ensureSpatialDemo(i){
+    const s=SCENES[i]; if(!s||!s.spatialDemo) return null;
+    const holder=scenes[i].querySelector('.spatial-demo'); if(!holder||holder.dataset.ready) return holder;
+    holder.dataset.ready='1';
+    const cfg=s.spatialDemo;
+    const a=new Audio(cfg.flat); a.loop=true; a.preload='auto';
+    let mode='flat', playing=false;
+    const playBtn=holder.querySelector('.sd-play');
+    const opts=[...holder.querySelectorAll('.sd-opt')];
+    playBtn.onclick=()=>{
+      playing=!playing;
+      playBtn.classList.toggle('on',playing);
+      if(playing) tryPlay(a); else a.pause();
+    };
+    opts.forEach(btn=>btn.addEventListener('click',()=>{
+      const m=btn.dataset.mode; if(m===mode) return;
+      const t=a.currentTime, wasPlaying=!a.paused;
+      mode=m; opts.forEach(o=>o.classList.toggle('active',o===btn));
+      a.src = m==='flat'?cfg.flat:cfg.spatial;
+      a.currentTime=t;
+      if(wasPlaying) tryPlay(a);
+    }));
+    holder.__audio=a; /* exposed for testing */
+    return holder;
   }
   /* desktop fallback: if autoplay was blocked, the first click/keypress resumes it */
   function resumeActiveVideo(){

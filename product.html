@@ -48,14 +48,23 @@ window.DEMO = {
       titleVideo:"assets/aura-one-logotype-anim.webm",
       title:'Aura <b>One</b>',
       lede:"Adaptive spatial audio in a 228-gram frame. The headphone that reads the room before you do.",
-      ctas:[{label:"Discover",style:"solid",go:1},{label:"Buy Now",go:3}]
+      ctas:[{label:"Discover",style:"solid",go:1},{label:"Buy Now",go:4}]
+    },
+    { id:"spin", trans:"pan", layout:"center",
+      eyebrow:"Every Angle",
+      title:'Turn It <b>Around</b>',
+      lede:"Drag to rotate. Aura One, from every side.",
+      spin:{ base:"assets/aura-spin/frame-", ext:".jpg", count:24, pad:2,
+             poster:"assets/product-homepage-hero-poster.jpg" },
+      ctas:[{label:"Continue",style:"solid",go:2}]
     },
     { id:"story", trans:"pan",
       loop:"assets/product-homepage-detail.mp4", poster:"assets/product-homepage-detail-poster.jpg",
       eyebrow:"Engineered Sound",
       title:'Silence,<br><b>Perfected</b>',
       lede:"Explore the acoustics, the materials and the intelligence inside. Tap a point to reveal each system.",
-      ctas:[{label:"Full Specs",style:"solid",modal:"specs"},{label:"Continue",go:2}],
+      spatialDemo:{ flat:"assets/aura-spatial-flat.mp3", spatial:"assets/aura-spatial-spatial.mp3" },
+      ctas:[{label:"Full Specs",style:"solid",modal:"specs"},{label:"Continue",go:3}],
       hotspots:[
         {x:"70%",y:"32%",label:"Drivers",modal:"drivers"},
         {x:"64%",y:"66%",label:"Noise Cancelling",modal:"anc"},
@@ -66,7 +75,7 @@ window.DEMO = {
       eyebrow:"The Details",
       title:'Every <b>Gram</b><br>Considered',
       lede:"Aerospace aluminium, protein-leather cushions, 40-hour battery. Compact panels — no scrolling required.",
-      ctas:[{label:"Compare Models",style:"solid",modal:"compare"},{label:"Next",go:3}]
+      ctas:[{label:"Compare Models",style:"solid",modal:"compare"},{label:"Next",go:4}]
     },
     { id:"cta", trans:"zoom",
       eyebrow:"Available Now",
@@ -113,7 +122,7 @@ window.DEMO = {
 <script>
 /* theme-only flourish: rotating product ring on scene 2 (visual, non-blocking) */
 window.addEventListener('load',()=>{
-  const story=document.querySelector('.scene[data-i="1"]');
+  const story=document.querySelector('.scene[data-i="2"]');
   if(story){const r=document.createElement('div');r.className='prod-ring';story.prepend(r);}
 });
 </script>

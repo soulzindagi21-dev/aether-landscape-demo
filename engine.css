@@ -323,6 +323,31 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .layout-lower .scene-media .tint{background:linear-gradient(180deg,rgba(0,0,0,.05) 35%,rgba(0,0,0,.8) 100%)}
 .layout-split .scene-media .tint{background:none}
 
+/* 360 drag-to-rotate product viewer */
+.spin360{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;
+  cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.spin360.dragging{cursor:grabbing}
+.spin360 img{max-width:76%;max-height:68%;object-fit:contain;pointer-events:none;
+  filter:drop-shadow(0 30px 60px rgba(0,0,0,.5))}
+.spin-hint{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+  background:rgba(0,0,0,.4);padding:8px 18px;border-radius:20px;border:1px solid var(--line);
+  opacity:1;transition:opacity .6s var(--ease);pointer-events:none;white-space:nowrap}
+.spin360.hinted .spin-hint{opacity:0}
+
+/* flat vs spatial audio A/B demo */
+.spatial-demo{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);z-index:3;
+  display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.35);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:30px;padding:8px 14px}
+.sd-play{width:32px;height:32px;border-radius:50%;background:var(--accent);
+  display:grid;place-items:center;flex:none;transition:.3s var(--ease)}
+.sd-play svg{width:13px;height:13px;fill:#04121f}
+.sd-play.on{filter:brightness(1.1)}
+.sd-toggle{display:flex;gap:4px;background:var(--glass);border-radius:20px;padding:3px}
+.sd-opt{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;
+  border-radius:16px;color:var(--muted);transition:.3s var(--ease)}
+.sd-opt.active{background:var(--accent);color:#04121f}
+
 /* wipe transition overlay */
 #wipe{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0}
 #wipe video{width:100%;height:100%;object-fit:cover}
