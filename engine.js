@@ -47,6 +47,7 @@
         <div class="grain"></div><div class="vignette"></div>
       </div>
       <div class="stage" id="stage"></div>
+      <canvas id="viz" aria-hidden="true"></canvas>
       <div id="wipe"></div>
       <div id="modal" role="dialog" aria-modal="true"><div class="card">
         <div class="card-head"><h3 id="mTitle">Detail</h3>
@@ -228,7 +229,8 @@
     playBtn.onclick=()=>{
       playing=!playing;
       playBtn.classList.toggle('on',playing);
-      if(playing) tryPlay(a); else a.pause();
+      if(playing){ vizAttach(a); tryPlay(a); } else { a.pause(); }
+      vizSetActive(a,playing);
     };
     opts.forEach(btn=>btn.addEventListener('click',()=>{
       const m=btn.dataset.mode; if(m===mode) return;
@@ -241,6 +243,80 @@
     holder.__audio=a; /* exposed for testing */
     return holder;
   }
+
+  /* ---------- audio-reactive visualization (Web Audio analyser -> canvas) ----------
+     Lights up whenever a track is actively playing (main player or the spatial
+     A/B demo). Entirely client-side; if the Web Audio API is unavailable or a
+     source can't be wired, audio playback continues untouched. */
+  const vizCanvas=document.getElementById('viz');
+  let vizCtx2d=null, audioCtx=null, analyser=null, freqData=null, vizRAF=0, vizRGB=null;
+  const vizWired=new WeakSet();
+  let vizActiveEl=null;
+  function vizColor(a){
+    if(!vizRGB){
+      const c=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      const m=c.match(/^#?([0-9a-f]{6})$/i);
+      vizRGB=m?[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)]:[201,161,90];
+    }
+    return 'rgba('+vizRGB[0]+','+vizRGB[1]+','+vizRGB[2]+','+a+')';
+  }
+  function vizAttach(el){
+    if(!el||!vizCanvas) return;
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC) return;
+      if(!audioCtx){
+        audioCtx=new AC();
+        analyser=audioCtx.createAnalyser();
+        analyser.fftSize=128; analyser.smoothingTimeConstant=.82;
+        analyser.connect(audioCtx.destination);
+        freqData=new Uint8Array(analyser.frequencyBinCount);
+      }
+      if(!vizWired.has(el)){
+        /* reroutes the element through the context — one source per element, ever */
+        audioCtx.createMediaElementSource(el).connect(analyser);
+        vizWired.add(el);
+      }
+      if(audioCtx.state==='suspended') audioCtx.resume();
+    }catch(err){ console.warn('audio viz unavailable:',err); }
+  }
+  function vizSetActive(el,on){
+    if(on){ vizActiveEl=el; }
+    else if(vizActiveEl===el){ vizActiveEl=null; }
+    if(vizActiveEl && analyser){
+      vizCanvas.classList.add('on');
+      if(!vizRAF) vizRAF=requestAnimationFrame(vizLoop);
+    }else{
+      vizCanvas.classList.remove('on');
+    }
+  }
+  function vizLoop(){
+    if(!vizCanvas.classList.contains('on')){ vizRAF=0; return; }
+    vizRAF=requestAnimationFrame(vizLoop);
+    if(!vizCtx2d){ vizCtx2d=vizCanvas.getContext&&vizCanvas.getContext('2d');
+      if(!vizCtx2d){ cancelAnimationFrame(vizRAF); vizRAF=0; return; } }
+    const w=vizCanvas.width=vizCanvas.offsetWidth, h=vizCanvas.height=vizCanvas.offsetHeight;
+    if(!w||!h||!analyser) return;
+    analyser.getByteFrequencyData(freqData);
+    const cx=w/2, bins=Math.min(48,freqData.length);
+    let bass=0; for(let k=0;k<6;k++) bass+=freqData[k]; bass/=(6*255);
+    /* bass-driven glow rising from the bottom of the frame */
+    const rad=Math.max(1,w*.5*(0.35+bass*.5));
+    const g=vizCtx2d.createRadialGradient(cx,h,0,cx,h,rad);
+    g.addColorStop(0,vizColor(Math.min(.32,.06+bass*.3)));
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    vizCtx2d.fillStyle=g; vizCtx2d.fillRect(0,0,w,h);
+    /* mirrored frequency bars along the bottom edge */
+    const bw=(w/2)/bins;
+    for(let k=0;k<bins;k++){
+      const v=freqData[k]/255, bh=v*v*h*.2;
+      if(bh<1) continue;
+      vizCtx2d.fillStyle=vizColor(.12+v*.22);
+      vizCtx2d.fillRect(cx+k*bw+1,h-bh,Math.max(1,bw-2),bh);
+      vizCtx2d.fillRect(cx-(k+1)*bw+1,h-bh,Math.max(1,bw-2),bh);
+    }
+  }
+
   /* desktop fallback: if autoplay was blocked, the first click/keypress resumes it */
   function resumeActiveVideo(){
     const v=scenes[activeVideoScene]?.querySelector('.scene-media video');
@@ -403,7 +479,10 @@
     if(pPlayBtn) pPlayBtn.innerHTML = soundOn
       ? '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>'
       : '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-    if(audio){ if(soundOn) tryPlay(audio); else audio.pause(); }
+    if(audio){
+      if(soundOn){ vizAttach(audio); tryPlay(audio); } else { audio.pause(); }
+      vizSetActive(audio,soundOn);
+    }
   }
   soundBtn.onclick=()=>setPlaying(!soundOn);
 
