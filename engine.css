@@ -106,18 +106,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .stage{position:absolute;inset:0;z-index:1}
 .scene{position:absolute;inset:0;display:grid;place-items:center;opacity:0;
   visibility:hidden;pointer-events:none;
-  transition:opacity .9s var(--ease),transform .9s var(--ease),filter .9s var(--ease)}
+  transition:opacity 1.2s var(--ease)}
 .scene.active{opacity:1;visibility:visible;pointer-events:auto}
-/* transition variants (applied to leaving/entering scenes) */
-.scene.enter-zoom{transform:scale(1.12);filter:blur(8px)}
-.scene.enter-zoom.active{transform:scale(1);filter:blur(0)}
-.scene.leave-zoom{transform:scale(.92);filter:blur(10px);opacity:0}
-.scene.enter-pan{transform:translateX(8%)}
-.scene.enter-pan.active{transform:translateX(0)}
-.scene.leave-pan{transform:translateX(-8%);opacity:0}
-.scene.enter-mask{clip-path:inset(0 0 100% 0)}
-.scene.enter-mask.active{clip-path:inset(0 0 0 0);transition:clip-path 1s var(--ease),opacity .9s var(--ease)}
-.scene.leave-mask{clip-path:inset(100% 0 0 0);opacity:0;transition:clip-path 1s var(--ease),opacity .9s var(--ease)}
+/* every scene transition (zoom/pan/mask, whatever a theme's `trans` field
+   says) now resolves to the same clean cross-fade above — scale/blur/slide/
+   clip-path motion looked jerky against static photography; a plain fade
+   reads as cinematic regardless of whether the scene behind it is a video
+   loop or a still. The enter-*/leave-* classes stay applied by JS (so scene
+   configs don't need editing) but no longer carry their own styling. */
 
 .wrap{position:relative;z-index:2;width:100%;height:100%;
   display:flex;flex-direction:column;justify-content:center;

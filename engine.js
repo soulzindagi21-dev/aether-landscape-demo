@@ -395,7 +395,7 @@
         from.className='scene'+(SCENES[+from.dataset.i].layout?' layout-'+SCENES[+from.dataset.i].layout:'');
         to.classList.remove('enter-'+t);
         current=n; busy=false;
-      },1000);
+      },1300); /* matches the 1.2s fade + a small settle margin */
     };
     runWipe(doSwap);
   }
