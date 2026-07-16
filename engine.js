@@ -104,7 +104,7 @@
         <div class="tint"></div></div>`;
     }
     const spinHtml = s.spin
-      ? `<div class="spin360"><img alt="Drag to rotate the product" draggable="false"><div class="spin-hint">← Drag to rotate →</div></div>` : '';
+      ? `<div class="spin360" ${s.spin.bg?`style="background:${s.spin.bg}"`:''}><img alt="Drag to rotate the product" draggable="false"><div class="spin-hint">← Drag to rotate →</div></div>` : '';
     const spatialHtml = s.spatialDemo
       ? `<div class="spatial-demo">
           <button class="sd-play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
