@@ -23,10 +23,14 @@
   /* ---------- inject shared shell markup ---------- */
   document.body.insertAdjacentHTML('afterbegin', `
     <div id="blackout"></div>
-    <div id="loader"><div style="text-align:center">
-      <div class="load-mark" id="loadMark">${BRAND}</div>
-      <div class="load-bar"><i></i></div>
-    </div></div>
+    <div id="loader">
+      <div class="grain"></div>
+      <div class="loader-glow"></div>
+      <div class="loader-inner">
+        <div class="load-mark" id="loadMark">${BRAND}</div>
+        <div class="load-bar"></div>
+      </div>
+    </div>
 
     <div id="entry"><div class="entry-inner">
       <div class="eyebrow" style="text-align:center">${DEMO.entryTagline||'A Cinematic Presentation'}</div>
