@@ -29,6 +29,7 @@
       <div class="loader-inner">
         <div class="load-mark" id="loadMark">${BRAND}</div>
         <div class="load-bar"></div>
+        <p class="load-status" id="loadStatus">Preparing the experience…</p>
       </div>
     </div>
 
@@ -134,6 +135,9 @@
     d.setAttribute('aria-label','Scene '+(i+1)); d.onclick=()=>goTo(i); dotsEl.appendChild(d);
   });
   const scenes=[...document.querySelectorAll('.scene')];
+  /* start buffering the homepage hero the instant the page loads — not on
+     Enter click — so by the time the visitor can click, it's already ready */
+  if(SCENES[0]&&SCENES[0].loop) ensureLoopVideo(0);
 
   /* ---------- loop video manager: one active decoder at a time ---------- */
   const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -586,7 +590,36 @@
   document.addEventListener("fullscreenchange",()=>{ console.log("fullscreenchange:",document.fullscreenElement); });
   document.addEventListener("fullscreenerror",e=>{ console.warn("fullscreenerror:",e); });
 
+  /* ---------- homepage preload gate ----------
+     Waits for scene 0's poster + hero video (and the ambient track, since it
+     auto-starts on Enter) to reach "can play through without stalling"
+     before letting the visitor past the loader. A hard cap keeps a slow or
+     failed request from stranding them on the loader forever — after that,
+     it reveals anyway (same failsafe philosophy as the wipe transition). */
+  function mediaReady(el){
+    return new Promise(res=>{
+      if(!el){ res(); return; }
+      if(el.readyState>=4){ res(); return; } /* HAVE_ENOUGH_DATA already */
+      const done=()=>{ el.removeEventListener('canplaythrough',done); el.removeEventListener('error',done); res(); };
+      el.addEventListener('canplaythrough',done);
+      el.addEventListener('error',done,{once:true});
+    });
+  }
+  function preloadFirstScene(){
+    const s=SCENES[0];
+    const tasks=[];
+    if(s&&s.poster){
+      tasks.push(new Promise(res=>{ const img=new Image(); img.onload=img.onerror=res; img.src=s.poster; }));
+    }
+    if(s&&s.loop) tasks.push(mediaReady(ensureLoopVideo(0)));
+    if(PLAYER) tasks.push(mediaReady(audio));
+    if(!tasks.length) return Promise.resolve();
+    const cap=new Promise(res=>setTimeout(res,8000));
+    return Promise.race([Promise.all(tasks), cap]);
+  }
   window.addEventListener('load',()=>{
-    setTimeout(()=>{ document.getElementById('loader').classList.add('hide'); },1100);
+    preloadFirstScene().then(()=>{
+      document.getElementById('loader').classList.add('hide');
+    });
   });
 })();
