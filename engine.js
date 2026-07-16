@@ -395,9 +395,13 @@
         from.className='scene'+(SCENES[+from.dataset.i].layout?' layout-'+SCENES[+from.dataset.i].layout:'');
         to.classList.remove('enter-'+t);
         current=n; busy=false;
-      },1300); /* matches the 1.2s fade + a small settle margin */
+      },1550); /* matches the 1.4s fade + a small settle margin */
     };
-    runWipe(doSwap);
+    /* video wipes (if a theme configures them) used to cover this moment with
+       a full-screen flash — that read as sudden/jarring on its own, on top of
+       the fade underneath. The plain cross-fade is now the only transition,
+       so we call doSwap directly instead of routing through runWipe(). */
+    doSwap();
   }
   function updateHUD(n){
     [...dotsEl.children].forEach((d,i)=>d.classList.toggle('on',i===n));
@@ -569,7 +573,7 @@
   function startExperience(){
     scenes[0].classList.add('active','enter-zoom');
     void scenes[0].offsetWidth; scenes[0].classList.remove('enter-zoom');
-    updateHUD(0); checkOrient(); prepWipes(); playScene(0);
+    updateHUD(0); checkOrient(); playScene(0); /* prepWipes() no longer called — see goTo() */
   }
   document.getElementById('enterBtn').addEventListener("click", async ()=>{
     await requestAppFullscreen();

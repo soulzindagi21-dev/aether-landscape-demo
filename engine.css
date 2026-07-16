@@ -106,7 +106,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .stage{position:absolute;inset:0;z-index:1}
 .scene{position:absolute;inset:0;display:grid;place-items:center;opacity:0;
   visibility:hidden;pointer-events:none;
-  transition:opacity 1.2s var(--ease)}
+  transition:opacity 1.4s var(--ease)}
 .scene.active{opacity:1;visibility:visible;pointer-events:auto}
 /* every scene transition (zoom/pan/mask, whatever a theme's trans field
    says) now resolves to the same clean cross-fade above — scale/blur/slide/
