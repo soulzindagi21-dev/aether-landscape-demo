@@ -574,7 +574,16 @@
       else if(element.webkitRequestFullscreen){ element.webkitRequestFullscreen(); }
     }catch(error){ console.warn("Fullscreen request failed:",error); }
   }
-  function hideEntryOverlay(){ document.getElementById('entry').classList.add('hide'); }
+  function hideEntryOverlay(){
+    /* entry is already fully hidden behind the opaque blackout at this point —
+       letting it run its own 0.8s CSS fade races against the blackout's later
+       2s reveal fade, and since entry resolves slower than the blackout takes
+       to become see-through, its content (the Enter button) could flash back
+       into view briefly. It doesn't need to fade at all here, just vanish. */
+    const entry=document.getElementById('entry');
+    entry.style.transition='none';
+    entry.classList.add('hide');
+  }
   function startExperience(){
     scenes[0].classList.add('active','enter-zoom');
     void scenes[0].offsetWidth; scenes[0].classList.remove('enter-zoom');
