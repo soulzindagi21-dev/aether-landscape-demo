@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+<meta name="theme-color" content="#0a0308" />
+<title>NOCTURNE VELVET — Official Merch</title>
+<link rel="stylesheet" href="engine.css" />
+<style>
+/* THEME: BAND MERCH — same crimson/violet identity as band.html, storefront framing */
+:root{
+  --bg:#0a0308; --bg2:#180611; --ink:#f6eef0; --muted:#b79aa2;
+  --accent:#e11d48; --accent2:#a21caf; --glass:rgba(255,255,255,.05);
+  --line:rgba(255,255,255,.13);
+  --font:"Georgia","Times New Roman",serif;
+}
+.title{font-weight:700!important;letter-spacing:-.02em!important;text-transform:uppercase}
+.title b{font-weight:900!important}
+.eyebrow{font-family:"Helvetica Neue",sans-serif}
+.btn{font-family:"Helvetica Neue",sans-serif;border-radius:4px!important}
+.entry-mark{font-weight:900;letter-spacing:.1em}
+.env{background:radial-gradient(120% 90% at 50% 110%,#3a0518 0%,var(--bg2) 45%,var(--bg) 100%)!important}
+.orb.a{background:radial-gradient(circle,var(--accent) 0%,transparent 60%)}
+.orb.b{background:radial-gradient(circle,var(--accent2) 0%,transparent 60%)}
+.orb.c{background:radial-gradient(circle,#ff9e40 0%,transparent 55%);opacity:.3}
+/* price tag styling inside product modals */
+.price{font-size:22px;color:var(--accent);font-family:"Helvetica Neue",sans-serif;font-weight:700;margin:10px 0 4px}
+</style>
+</head>
+<body>
+<script>
+function spec(rows){return '<div class="spec">'+rows.map(function(r){return '<div><span>'+r[0]+'</span><b>'+r[1]+'</b></div>';}).join('')+'</div>';}
+window.DEMO = {
+  brand:"NOCTURNE VELVET",
+  entryTagline:"Official Merch Shop",
+  homeHref:"band.html",
+  scenes:[
+    { id:"hero", trans:"zoom", layout:"left",
+      eyebrow:"The Ash & Gold Collection",
+      title:'Wear The<br><b>Night</b>',
+      lede:"Limited-run merch from the Ash & Gold sessions. Cut small, printed dark, gone once it's gone.",
+      ctas:[{label:"Shop The Drop",style:"solid",go:1}]
+    },
+    { id:"collection", trans:"pan", layout:"lower",
+      eyebrow:"The Drop",
+      title:'Four Pieces.<br>One <b>Night</b>.',
+      lede:"Tap a piece to see sizing, materials, and price.",
+      bg:"radial-gradient(90% 90% at 70% 20%,rgba(225,29,72,.22),transparent 55%),radial-gradient(80% 80% at 20% 90%,rgba(162,28,175,.22),transparent 60%)",
+      ctas:[{label:"Checkout",style:"solid",go:2}],
+      hotspots:[
+        {x:"22%",y:"38%",label:"Tour Tee",modal:"tee"},
+        {x:"48%",y:"66%",label:"Vinyl LP",modal:"vinyl"},
+        {x:"74%",y:"40%",label:"Hoodie",modal:"hoodie"},
+        {x:"88%",y:"70%",label:"Print",modal:"poster"}
+      ]
+    },
+    { id:"cta", trans:"zoom", layout:"minimal",
+      eyebrow:"Limited Run",
+      title:'Before It’s<br><b>Gone</b>',
+      lede:"This drop is printed once. When it sells out, it doesn't come back.",
+      ctas:[
+        {label:"Checkout — ₹0.00",style:"solid",href:"#checkout"},
+        {label:"Track My Order",href:"#track"},
+        {label:"Shipping & Returns",modal:"shipping"},
+        {label:"Contact Support",modal:"support"},
+        {label:"↺ Restart",go:0}
+      ]
+    }
+  ],
+  modals:{
+    tee:{title:"Ash & Gold Tour Tee",tabs:[
+      {name:"Overview",html:"<p>Oversized fit, heavyweight combed cotton, faded tour-poster print on the back. Dummy product copy — replace with real photography and description.</p>"+spec_price('₹1,499')},
+      {name:"Sizing",html:spec([["Fit","Oversized"],["Sizes","S · M · L · XL · XXL"],["Material","100% combed cotton, 240gsm"],["Care","Cold wash, inside out"]])}
+    ]},
+    vinyl:{title:"Ash & Gold — Vinyl LP",tabs:[
+      {name:"Overview",html:"<p>Gold-splatter 180g vinyl, gatefold sleeve, includes a printed lyric booklet. Limited to 500 numbered copies. Dummy copy — replace with real pressing details.</p>"+spec_price('₹2,999')},
+      {name:"Details",html:spec([["Format","180g Vinyl, Gatefold"],["Edition","Gold Splatter · Numbered /500"],["Includes","Lyric booklet, download code"],["Ships","Late August"]])}
+    ]},
+    hoodie:{title:"Nocturne Hoodie",tabs:[
+      {name:"Overview",html:"<p>Heavyweight fleece, embroidered chest logotype, ribbed cuffs. Dummy product copy — replace with real photography and description.</p>"+spec_price('₹3,499')},
+      {name:"Sizing",html:spec([["Fit","Relaxed"],["Sizes","S · M · L · XL · XXL"],["Material","400gsm brushed fleece"],["Care","Cold wash, do not tumble dry"]])}
+    ]},
+    poster:{title:"Cathedral Sessions Print",tabs:[
+      {name:"Overview",html:"<p>Numbered giclée print from the recording sessions, matte finish, ready to frame. Dummy product copy — replace with real photography.</p>"+spec_price('₹899')},
+      {name:"Details",html:spec([["Size","18 × 24 in"],["Finish","Matte, acid-free stock"],["Edition","Numbered /250"],["Frame","Not included"]])}
+    ]},
+    shipping:{title:"Shipping & Returns",tabs:[
+      {name:"Info",html:"<p>Ships worldwide within 5–7 business days of the drop closing. Returns accepted within 14 days on unworn, unopened items. Dummy policy — replace with real terms.</p>"}
+    ]},
+    support:{title:"Contact Support",tabs:[
+      {name:"Reach us",html:"<p>merch@nocturnevelvet.example<br>Mon–Sat, 10–7 IST<br>@nocturnevelvet</p>"}
+    ]}
+  }
+};
+function spec_price(p){return '<div class="price">'+p+'</div>';}
+</script>
+<script src="engine.js"></script>
+</body>
+</html>

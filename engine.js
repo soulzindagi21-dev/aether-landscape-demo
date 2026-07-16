@@ -400,7 +400,8 @@
     if(b.dataset.go!==undefined) goTo(+b.dataset.go);
     else if(b.dataset.modal) openModal(b.dataset.modal);
     else if(b.dataset.href){ const h=b.dataset.href;
-      if(h.startsWith('http')) window.open(h,'_blank','noopener'); }
+      if(h.startsWith('http')) window.open(h,'_blank','noopener');
+      else if(!h.startsWith('#')) location.href=h; /* same-site page link (e.g. merch.html); bare "#anchor" stays a no-op placeholder */ }
   });
 
   function openModal(key){
