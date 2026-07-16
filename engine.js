@@ -192,7 +192,7 @@
     const s=SCENES[i]; if(!s||!s.spin) return null;
     const holder=scenes[i].querySelector('.spin360'); if(!holder||holder.dataset.ready) return holder;
     holder.dataset.ready='1';
-    const cfg=s.spin, count=cfg.count||0, pad=cfg.pad||2;
+    const cfg=s.spin, count=cfg.count||0, pad=cfg.pad||2, pxPerFrame=cfg.pxPerFrame||40;
     const frameSrc=(n)=> cfg.frames ? cfg.frames[n] : (cfg.base+String(n+1).padStart(pad,'0')+cfg.ext);
     const img=holder.querySelector('img');
     img.src=cfg.poster||(count?frameSrc(0):'');
@@ -213,7 +213,7 @@
     function onMove(e){
       if(!dragging) return;
       const dx=pos(e)-startX;
-      setFrame(startFrame-Math.round(dx/6));
+      setFrame(startFrame-Math.round(dx/pxPerFrame));
     }
     function onUp(){ dragging=false; holder.classList.remove('dragging'); }
     holder.addEventListener('pointerdown',onDown);
