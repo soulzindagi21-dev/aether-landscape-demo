@@ -14,6 +14,7 @@
   /* a bare DEMO.audio (no visible player) still works for any theme; DEMO.player
      additionally renders a transport UI, themed per-page via CSS variables */
   const PLAYER = DEMO.player || (DEMO.audio ? {tracks:[{title:BRAND, src:DEMO.audio}]} : null);
+  const HAS_AUDIO = !!PLAYER || SCENES.some(s=>s.spatialDemo);
   /* VP9-alpha WebM plays in Chrome/Edge/Firefox/Android but not Safari/iOS —
      gate animated logotypes on it so unsupported browsers keep the static PNG */
   const supportsWebmAlpha=(function(){const v=document.createElement('video');
@@ -63,6 +64,9 @@
         <button class="ic off" id="soundBtn" aria-label="Toggle sound">
           <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="on-path" d="M16 8a5 5 0 0 1 0 8"/><path class="on-path" d="M19 5a9 9 0 0 1 0 14"/></svg></button>
         <button class="ic" id="homeBtn" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
+        ${HAS_AUDIO ? `<label class="viz-switch" title="Toggle visualizer">
+          <input type="checkbox" id="vizToggle" checked><span class="viz-switch-track"></span>
+        </label>` : ''}
       </div>
       <div class="hud scene-count" id="sceneCount"><b>01</b> / 04</div>
       ${PLAYER ? `<div class="hud player" id="player">
@@ -251,7 +255,12 @@
   const vizCanvas=document.getElementById('viz');
   let vizCtx2d=null, audioCtx=null, analyser=null, freqData=null, vizRAF=0, vizRGB=null;
   const vizWired=new WeakSet();
-  let vizActiveEl=null;
+  let vizActiveEl=null, vizEnabled=true;
+  const vizToggle=document.getElementById('vizToggle');
+  if(vizToggle) vizToggle.addEventListener('change',()=>{
+    vizEnabled=vizToggle.checked;
+    vizSetActive(vizActiveEl,!!vizActiveEl); /* re-evaluate; CSS opacity transition handles the fade */
+  });
   function vizColor(a){
     if(!vizRGB){
       const c=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
@@ -283,7 +292,7 @@
   function vizSetActive(el,on){
     if(on){ vizActiveEl=el; }
     else if(vizActiveEl===el){ vizActiveEl=null; }
-    if(vizActiveEl && analyser){
+    if(vizActiveEl && analyser && vizEnabled){
       vizCanvas.classList.add('on');
       if(!vizRAF) vizRAF=requestAnimationFrame(vizLoop);
     }else{
