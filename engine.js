@@ -378,30 +378,35 @@
     setTimeout(()=>{ mid(); wipeEl.classList.remove('play'); }, 2500);
   }
 
+  /* Scene navigation = fade the whole screen to solid black, swap the scene
+     instantly while it's hidden behind the black, then fade the black away to
+     reveal the new one. Routing through #blackout (not a scene-to-scene
+     cross-fade) means (a) it never dips through the crimson ambient background
+     mid-transition, and (b) it stays exempt from the reduced-motion rule that
+     otherwise crushes CSS transitions to near-instant. */
+  const navBlackout=document.getElementById('blackout');
   function goTo(n){
     if(busy||n===current||n<0||n>=scenes.length)return;
     busy=true;
-    const doSwap=()=>{
-      const from=scenes[current], to=scenes[n], t=SCENES[n].trans||'zoom';
-      from.classList.add('leave-'+t); to.classList.add('enter-'+t);
-      /* reset the incoming scene's text reveal BEFORE it goes active (matters
-         on repeat visits, where .rise already sat at its finished opacity:1
-         from last time) — resetting after would flash the old state first */
+    navBlackout.classList.add('nav');
+    navBlackout.classList.add('show'); /* fade to black (~.65s) */
+    setTimeout(()=>{
+      const from=scenes[current], to=scenes[n];
+      /* swap instantly while fully hidden — kill the scene's own opacity
+         transition for this frame so the switch happens under the black,
+         not as a second visible fade once the black lifts */
+      from.style.transition='none'; to.style.transition='none';
+      /* reset the incoming scene's text reveal so it replays on this visit */
       to.querySelectorAll('.rise').forEach(r=>{r.style.animation='none';void r.offsetWidth;r.style.animation='';});
-      void to.offsetWidth;
       to.classList.add('active'); from.classList.remove('active');
+      from.className='scene'+(SCENES[+from.dataset.i].layout?' layout-'+SCENES[+from.dataset.i].layout:'');
+      void to.offsetWidth;
+      from.style.transition=''; to.style.transition='';
       updateHUD(n); playScene(n);
-      setTimeout(()=>{
-        from.className='scene'+(SCENES[+from.dataset.i].layout?' layout-'+SCENES[+from.dataset.i].layout:'');
-        to.classList.remove('enter-'+t);
-        current=n; busy=false;
-      },1550); /* matches the 1.4s fade + a small settle margin */
-    };
-    /* video wipes (if a theme configures them) used to cover this moment with
-       a full-screen flash — that read as sudden/jarring on its own, on top of
-       the fade underneath. The plain cross-fade is now the only transition,
-       so we call doSwap directly instead of routing through runWipe(). */
-    doSwap();
+      current=n;
+      navBlackout.classList.remove('show'); /* fade back in (~.8s) */
+      setTimeout(()=>{ navBlackout.classList.remove('nav'); busy=false; },900);
+    },720); /* hold until fully black before swapping */
   }
   function updateHUD(n){
     [...dotsEl.children].forEach((d,i)=>d.classList.toggle('on',i===n));

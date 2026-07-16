@@ -51,6 +51,11 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 #blackout{position:fixed;inset:0;z-index:120;background:#000;opacity:0;pointer-events:none;
   transition:opacity 2s ease} /* base transition = the slow 2s fade-IN from black */
 #blackout.show{opacity:1;pointer-events:auto;transition:opacity .8s ease} /* quicker fade TO black */
+/* scene-to-scene navigation reuses the same black overlay (fade to black,
+   swap the scene while hidden, fade back in) — quicker + symmetric vs the
+   dramatic first entrance. Higher specificity than the .show rules above. */
+#blackout.nav{transition:opacity .8s ease}
+#blackout.nav.show{transition:opacity .65s ease}
 
 /* ---------- loader ---------- */
 #loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;
@@ -275,6 +280,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
      so the slow reveal still reads as designed even with reduced-motion on */
   #blackout{transition-duration:2s!important}
   #blackout.show{transition-duration:.8s!important}
+  #blackout.nav{transition-duration:.8s!important}
+  #blackout.nav.show{transition-duration:.65s!important}
   .rise{animation-duration:2s!important}
   .d3,.d4{animation-duration:3s!important}
   #app.revealed .hud{animation-duration:1.8s!important}
