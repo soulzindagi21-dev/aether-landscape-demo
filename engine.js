@@ -64,11 +64,10 @@
         <button class="ic off" id="soundBtn" aria-label="Toggle sound">
           <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="on-path" d="M16 8a5 5 0 0 1 0 8"/><path class="on-path" d="M19 5a9 9 0 0 1 0 14"/></svg></button>
         <button class="ic" id="homeBtn" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
-        ${HAS_AUDIO ? `<label class="viz-switch" title="Toggle visualizer">
-          <input type="checkbox" id="vizToggle" checked><span class="viz-switch-track"></span>
-        </label>` : ''}
       </div>
-      <div class="hud scene-count" id="sceneCount"><b>01</b> / 04</div>
+      ${HAS_AUDIO ? `<label class="hud viz-switch" id="vizSwitch" title="Toggle visualizer">
+        <input type="checkbox" id="vizToggle" checked><span class="viz-switch-track"></span>
+      </label>` : ''}
       ${PLAYER ? `<div class="hud player" id="player">
         <button class="p-play" id="pPlay" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
         <div class="p-body">
@@ -83,8 +82,7 @@
   /* ---------- engine ---------- */
   const stage=document.getElementById('stage'), dotsEl=document.getElementById('dots'),
     modal=document.getElementById('modal'), mTitle=document.getElementById('mTitle'),
-    mTabs=document.getElementById('mTabs'), mBody=document.getElementById('mBody'),
-    countEl=document.getElementById('sceneCount');
+    mTabs=document.getElementById('mTabs'), mBody=document.getElementById('mBody');
   let current=0, busy=false, soundOn=false, trackIdx=0;
   const audio = PLAYER ? new Audio(PLAYER.tracks[0].src) : null;
   if(audio){ audio.preload='auto'; if(!PLAYER.tracks || PLAYER.tracks.length<2) audio.loop=true; }
@@ -395,7 +393,6 @@
   }
   function updateHUD(n){
     [...dotsEl.children].forEach((d,i)=>d.classList.toggle('on',i===n));
-    countEl.innerHTML=`<b>${String(n+1).padStart(2,'0')}</b> / ${String(scenes.length).padStart(2,'0')}`;
   }
 
   document.getElementById('app').addEventListener('click',e=>{

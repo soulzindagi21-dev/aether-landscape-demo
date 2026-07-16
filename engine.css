@@ -206,7 +206,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 #app.revealed .brand-tag{animation-delay:.1s}
 #app.revealed .dots{animation-delay:.28s}
 #app.revealed .ctrls{animation-delay:.46s}
-#app.revealed .scene-count{animation-delay:.62s}
+#app.revealed .viz-switch{animation-delay:.62s}
 #app.revealed .player{animation-delay:.78s}
 @keyframes hudFade{to{opacity:1}}
 .dots{left:clamp(20px,5vw,44px);top:50%;transform:translateY(-50%);
@@ -221,20 +221,19 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .ic:hover{border-color:var(--accent)}
 .ic svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:1.5}
 .ic.off svg .on-path{display:none}
-.viz-switch{display:inline-flex;align-items:center;width:42px;height:24px;cursor:pointer;flex:none}
+/* sits where the scene page-count marker used to be, bottom-right */
+.viz-switch{right:clamp(20px,5vw,44px);bottom:clamp(18px,4vh,30px);
+  display:inline-flex;align-items:center;width:42px;height:24px;cursor:pointer}
 .viz-switch input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .viz-switch-track{position:relative;width:100%;height:100%;border-radius:20px;
   background:rgba(0,0,0,.3);border:1px solid var(--line);backdrop-filter:blur(8px);
   transition:.3s var(--ease)}
 .viz-switch-track::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;
   border-radius:50%;background:var(--muted);transition:.3s var(--ease)}
-.viz-switch input:checked+.viz-switch-track{background:var(--glass);border-color:var(--accent)}
-.viz-switch input:checked+.viz-switch-track::after{transform:translateX(18px);background:var(--accent)}
+.viz-switch input:checked+.viz-switch-track{background:rgba(225,29,72,.16);border-color:#e11d48}
+.viz-switch input:checked+.viz-switch-track::after{transform:translateX(18px);background:#e11d48}
 .brand-tag{left:clamp(20px,5vw,44px);top:clamp(18px,4vh,30px);
   font-size:12px;letter-spacing:.42em;font-weight:300;color:var(--ink)}
-.scene-count{right:clamp(20px,5vw,44px);bottom:clamp(18px,4vh,30px);
-  font-size:11px;letter-spacing:.2em;color:var(--muted)}
-.scene-count b{color:var(--ink);font-weight:400}
 
 /* basic digital track player — themed via the page's own CSS variables */
 .player{left:50%;bottom:clamp(18px,4vh,30px);transform:translateX(-50%);
