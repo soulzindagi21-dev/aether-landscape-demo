@@ -118,9 +118,11 @@
          <button class="spin-btn next" aria-label="Rotate right"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
          <div class="spin-hint">Hold an arrow to rotate</div></div>` : '';
     /* decorative wordmark clip (e.g. an animated product name on solid black);
-       mix-blend screen in CSS drops the black so only the lettering shows */
+       mix-blend screen in CSS drops the black so only the lettering shows.
+       No src here — set lazily by ensureNameVideo() once this scene is
+       actually active, same lazy contract as the ambient loop/spin videos. */
     const nameHtml = s.nameVideo
-      ? `<div class="name-vid rise d1"><video autoplay muted loop playsinline preload="auto" src="${s.nameVideo}"></video></div>` : '';
+      ? `<div class="name-vid rise d1"><video muted loop playsinline preload="none"></video></div>` : '';
     const spatialHtml = s.spatialDemo
       ? `<div class="spatial-demo">
           <button class="sd-play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
@@ -138,8 +140,10 @@
       return `<button class="${cls}" ${attr}>${c.label}<span class="arr">→</span></button>`;
     }).join('');
     const useTitleVid = s.titleVideo && supportsWebmAlpha;
+    /* title-vid's <source> has no src yet either — ensureTitleVideo() wires
+       it up once the scene is active, for the same reason as name-vid above */
     const titleHtml = s.titleImage
-      ? `<div class="title-img rise d2${useTitleVid?' has-vid':''}" style="--logo-mask:url('${s.titleImage}')"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}">${useTitleVid?`<video class="title-vid" autoplay muted loop playsinline preload="auto"><source src="${s.titleVideo}" type="video/webm"></video>`:''}</div>`
+      ? `<div class="title-img rise d2${useTitleVid?' has-vid':''}" style="--logo-mask:url('${s.titleImage}')"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}">${useTitleVid?`<video class="title-vid" muted loop playsinline preload="none"><source type="video/webm"></video>`:''}</div>`
       : `<h1 class="title${s.titleClass?' '+s.titleClass:''} rise d2">${s.title||''}</h1>`;
     el.innerHTML=`${media}${spinHtml}${nameHtml}${spatialHtml}${spots}<div class="wrap">
       <div class="eyebrow rise d1">${s.eyebrow||''}</div>
@@ -201,6 +205,26 @@
     if(SCENES[i+1]&&SCENES[i+1].loop) ensureLoopVideo(i+1);
     if(SCENES[i]&&SCENES[i].spin) ensureSpinViewer(i);
     if(SCENES[i]&&SCENES[i].spatialDemo) ensureSpatialDemo(i);
+    if(SCENES[i]&&SCENES[i].nameVideo) ensureNameVideo(i);
+    if(SCENES[i]&&SCENES[i].titleVideo) ensureTitleVideo(i);
+  }
+  /* decorative wordmark/title clips are small, but they were still being
+     fetched for every scene that has one the instant the page loads (their
+     <video src> was baked into the initial innerHTML) — the one thing the
+     engine's whole lazy-video contract exists to prevent. Wire the src only
+     once the scene actually goes active, exactly like ensureLoopVideo. */
+  function ensureNameVideo(i){
+    const s=SCENES[i]; if(!s||!s.nameVideo) return;
+    const v=scenes[i].querySelector('.name-vid video'); if(!v||v.dataset.ready) return;
+    v.dataset.ready='1'; v.src=s.nameVideo; v.setAttribute('autoplay','');
+    tryPlay(v);
+  }
+  function ensureTitleVideo(i){
+    const s=SCENES[i]; if(!s||!s.titleVideo) return;
+    const v=scenes[i].querySelector('.title-vid'); if(!v||v.dataset.ready) return;
+    v.dataset.ready='1'; v.querySelector('source').src=s.titleVideo; v.load();
+    v.setAttribute('autoplay','');
+    tryPlay(v);
   }
 
   /* ---------- 360 drag-to-rotate product viewer ---------- */
