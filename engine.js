@@ -108,7 +108,10 @@
       : `<img alt="Drag to rotate the product" draggable="false">`;
     const spinBg = (s.spin&&s.spin.bg)||'#000';
     const spinHtml = s.spin
-      ? `<div class="spin360" style="background:${spinBg};--spin-bg:${spinBg}"><div class="spin-glow"></div>${spinMedia}<div class="spin-vignette"></div><div class="spin-hint">← Drag to rotate →</div></div>` : '';
+      ? `<div class="spin360" style="background:${spinBg};--spin-bg:${spinBg}"><div class="spin-glow"></div>${spinMedia}<div class="spin-vignette"></div>
+         <button class="spin-btn prev" aria-label="Rotate left"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+         <button class="spin-btn next" aria-label="Rotate right"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+         <div class="spin-hint">Hold an arrow to rotate</div></div>` : '';
     /* decorative wordmark clip (e.g. an animated product name on solid black);
        mix-blend screen in CSS drops the black so only the lettering shows */
     const nameHtml = s.nameVideo
@@ -277,6 +280,37 @@
     holder.addEventListener('touchstart',onDown,{passive:true});
     holder.addEventListener('touchmove',onMove,{passive:true});
     holder.addEventListener('touchend',onUp);
+    /* hold-to-rotate buttons — the primary control on touch devices, where
+       drag-scrubbing proved clunky (every pointermove queues a seek; slower
+       phones drop enough of them that the motion stutters). Holding a button
+       advances the playhead at a smooth constant rate instead, using the same
+       clamped setTime (locks at the clip ends) and the same rAF seek throttle. */
+    const secsPerTurn=cfg.secondsPerTurn||6; /* full 360 takes this long while held */
+    let holdDir=0, holdRAF=0, lastTs=0;
+    function holdLoop(ts){
+      if(!holdDir){ holdRAF=0; return; }
+      holdRAF=requestAnimationFrame(holdLoop);
+      /* clamp the frame delta: a stalled rAF (tab jank, decoder busy) would
+         otherwise deliver one huge dt and make the rotation jump instead of
+         glide — cap it so a stall just pauses the turn for that moment */
+      const dt=Math.max(0,Math.min(.1,(ts-lastTs)/1000)); lastTs=ts;
+      if(duration) setTime(current + holdDir*dt*(duration/secsPerTurn));
+    }
+    holder.querySelectorAll('.spin-btn').forEach(btn=>{
+      const dir=(btn.classList.contains('next')?1:-1)*dragSign; /* invertDrag flips buttons too */
+      function start(e){
+        e.stopPropagation(); /* don't also start a drag on the holder */
+        if(e.cancelable) e.preventDefault(); /* suppress long-press context menu on Android */
+        holdDir=dir; btn.classList.add('holding'); holder.classList.add('hinted');
+        if(!holdRAF){ lastTs=performance.now(); holdRAF=requestAnimationFrame(holdLoop); }
+      }
+      function stop(){ holdDir=0; btn.classList.remove('holding'); }
+      btn.addEventListener('pointerdown',start);
+      btn.addEventListener('pointerup',stop);
+      btn.addEventListener('pointercancel',stop);
+      btn.addEventListener('pointerleave',stop);
+      btn.addEventListener('contextmenu',e=>e.preventDefault());
+    });
     /* rAF-throttled seek: writing video.currentTime on every single pointermove
        queues seeks faster than the decoder can drain them, so the scrub visibly
        lags the cursor — cap it to one seek per rendered frame instead */
@@ -287,6 +321,7 @@
       pending=null;
     })();
     holder.__setTime=setTime; /* exposed for testing */
+    holder.__holdLoop=holdLoop; /* exposed for testing */
     return holder;
   }
 

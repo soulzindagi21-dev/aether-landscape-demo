@@ -394,6 +394,23 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
    only its actual content stays clickable */
 .spin360 ~ .wrap{pointer-events:none}
 .spin360 ~ .wrap *{pointer-events:auto}
+/* hold-to-rotate buttons — the touch-friendly control for the 360 viewer */
+.spin-btn{position:absolute;z-index:4;top:50%;transform:translateY(-50%);
+  width:clamp(46px,6.5vw,62px);height:clamp(46px,6.5vw,62px);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.45);border:1px solid var(--line);backdrop-filter:blur(6px);
+  touch-action:none;-webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .3s var(--ease),border-color .3s var(--ease),transform .15s var(--ease)}
+.spin-btn svg{width:44%;height:44%;fill:none;stroke:var(--ink);stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+/* prev sits clear of the scene-dots column (dots live at left:~44px, centered
+   vertically — same band as these buttons) */
+.spin-btn.prev{left:clamp(64px,9vw,104px)}
+.spin-btn.next{right:clamp(20px,5vw,48px)}
+.spin-btn.holding{background:rgba(0,0,0,.7);border-color:var(--accent);
+  transform:translateY(-50%) scale(.94)}
+.spin-btn.holding svg{stroke:var(--accent)}
 .spin-hint{position:absolute;z-index:3;bottom:24%;left:50%;transform:translateX(-50%);
   font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
   background:rgba(0,0,0,.4);padding:8px 18px;border-radius:20px;border:1px solid var(--line);
@@ -403,10 +420,12 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 /* decorative animated wordmark (product-name clip on solid black). mix-blend
    screen knocks the black out so only the lettering rides over the scene;
    sits top-centre, above the product, and never intercepts drag/clicks */
-.name-vid{position:absolute;z-index:2;top:50%;right:clamp(16px,5.5vw,56px);transform:translateY(-50%);
-  width:min(430px,38vw);pointer-events:none;mix-blend-mode:screen}
+/* top-right corner, seated just below the HUD control row (back/sound/home
+   live at top:~30px right:~44px) so the two never overlap */
+.name-vid{position:absolute;z-index:2;top:clamp(58px,11vh,88px);right:clamp(16px,4.5vw,48px);
+  width:min(400px,34vw);pointer-events:none;mix-blend-mode:screen}
 .name-vid video{width:100%;height:auto;display:block}
-@media (max-height:430px){.name-vid{width:min(340px,34vw)}}
+@media (max-height:430px){.name-vid{top:48px;width:min(300px,30vw)}}
 
 /* flat vs spatial audio A/B demo */
 .spatial-demo{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);z-index:3;
