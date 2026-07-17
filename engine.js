@@ -601,9 +601,16 @@
     else if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(current+1);
     else if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(current-1);
   });
-  let sx=0,sy=0;
-  stage.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  /* swipe-to-navigate must not fire for drags that start on the 360 viewer —
+     its own drag-to-rotate gesture is horizontal too, so without this guard
+     every rotate drag also satisfied the swipe threshold and jumped scenes */
+  let sx=0,sy=0,sInSpin=false;
+  stage.addEventListener('touchstart',e=>{
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+    sInSpin=!!e.target.closest('.spin360');
+  },{passive:true});
   stage.addEventListener('touchend',e=>{
+    if(sInSpin) return;
     const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)) goTo(current+(dx<0?1:-1));
   },{passive:true});
