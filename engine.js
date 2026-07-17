@@ -241,6 +241,11 @@
     const vid=holder.querySelector('video');
     vid.src=cfg.video;
     const pxPerTurn=cfg.pxPerTurn||600; /* px of drag for one full 360deg turn */
+    /* drag→rotation direction. Default: dragging right advances the playhead so
+       the product surface tracks the finger. Set spin.invertDrag:true in the
+       config to reverse it — no video re-encode needed, this is the single
+       source of truth for spin direction. */
+    const dragSign=cfg.invertDrag?-1:1;
     let duration=0, current=0, dragging=false, startX=0, startTime=0, pending=null;
     vid.addEventListener('loadedmetadata',()=>{ duration=vid.duration||0; });
     function pos(e){ return e.touches?e.touches[0].clientX:e.clientX; }
@@ -256,7 +261,7 @@
     function onMove(e){
       if(!dragging||!duration) return;
       const dx=pos(e)-startX;
-      setTime(startTime-(dx/pxPerTurn)*duration);
+      setTime(startTime+dragSign*(dx/pxPerTurn)*duration);
     }
     function onUp(){ dragging=false; holder.classList.remove('dragging'); }
     holder.addEventListener('pointerdown',onDown);
