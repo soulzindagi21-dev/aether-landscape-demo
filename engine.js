@@ -722,6 +722,34 @@
     inner.style.margin='0';
     inner.style.transform='none';
   }
+  /* Once the visitor has entered on any engine page this session, sibling
+     pages of the same experience (band.html -> merch.html and back) must not
+     demand a second "Enter Experience" click — the gate exists to capture the
+     first gesture, and in-experience navigation should feel continuous. */
+  const ENTERED_KEY='aether-entered';
+  function markEntered(){ try{ sessionStorage.setItem(ENTERED_KEY,'1'); }catch(err){ console.warn('sessionStorage unavailable:',err); } }
+  function wasEntered(){ try{ return sessionStorage.getItem(ENTERED_KEY)==='1'; }catch(err){ return false; } }
+  function skipEntryGate(){
+    /* arrive already-black, assemble, then run the normal 2s reveal — page-to-
+       page moves inside the experience read as one continuous fade through
+       black instead of a re-gate */
+    const blackout=document.getElementById('blackout');
+    blackout.style.transition='none'; blackout.classList.add('show');
+    void blackout.offsetWidth; blackout.style.transition='';
+    hideEntryOverlay(); startExperience();
+    document.getElementById('app').classList.add('revealed');
+    if(audio) setPlaying(true); /* may be autoplay-blocked without a gesture — retried below */
+    /* fullscreen cannot survive a cross-page navigation (browsers require a
+       fresh gesture), so reclaim it — and kick blocked audio — on the first
+       tap/click anywhere in the new page */
+    document.addEventListener('pointerdown',()=>{
+      requestAppFullscreen();
+      try{ screen.orientation?.lock?.("landscape"); }
+      catch(err){ console.warn("Orientation lock unavailable:",err); }
+      if(audio&&!soundOn) setPlaying(true);
+    },{once:true});
+    setTimeout(()=>blackout.classList.remove('show'),80);
+  }
   document.getElementById('enterBtn').addEventListener("click", async ()=>{
     /* Sequence (deliberate, per design): fade the entry gate fully to black
        FIRST, and only then request fullscreen — so the viewport expansion
@@ -732,6 +760,7 @@
        Android build ever refuses fullscreen because of the delay, this
        ordering is the first thing to revisit. Gate layout is still frozen so
        nothing shifts during the fade itself. */
+    markEntered();
     freezeEntryGate();
     const blackout=document.getElementById('blackout');
     blackout.classList.add('show'); /* smooth .8s fade to black */
@@ -782,6 +811,7 @@
   window.addEventListener('load',()=>{
     preloadFirstScene().then(()=>{
       document.getElementById('loader').classList.add('hide');
+      if(wasEntered()) skipEntryGate();
     });
   });
 })();
