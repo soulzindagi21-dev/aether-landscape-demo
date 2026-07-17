@@ -394,11 +394,19 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
    only its actual content stays clickable */
 .spin360 ~ .wrap{pointer-events:none}
 .spin360 ~ .wrap *{pointer-events:auto}
-.spin-hint{position:absolute;z-index:3;bottom:14%;left:50%;transform:translateX(-50%);
+.spin-hint{position:absolute;z-index:3;bottom:24%;left:50%;transform:translateX(-50%);
   font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
   background:rgba(0,0,0,.4);padding:8px 18px;border-radius:20px;border:1px solid var(--line);
   opacity:1;transition:opacity .6s var(--ease);pointer-events:none;white-space:nowrap}
 .spin360.hinted .spin-hint{opacity:0}
+
+/* decorative animated wordmark (product-name clip on solid black). mix-blend
+   screen knocks the black out so only the lettering rides over the scene;
+   sits top-centre, above the product, and never intercepts drag/clicks */
+.name-vid{position:absolute;z-index:2;top:clamp(10px,3.5vh,32px);left:50%;transform:translateX(-50%);
+  width:min(360px,32vw);pointer-events:none;mix-blend-mode:screen}
+.name-vid video{width:100%;height:auto;display:block}
+@media (max-height:430px){.name-vid{top:8px;width:min(300px,30vw)}}
 
 /* flat vs spatial audio A/B demo */
 .spatial-demo{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);z-index:3;

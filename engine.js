@@ -109,6 +109,10 @@
     const spinBg = (s.spin&&s.spin.bg)||'#000';
     const spinHtml = s.spin
       ? `<div class="spin360" style="background:${spinBg};--spin-bg:${spinBg}"><div class="spin-glow"></div>${spinMedia}<div class="spin-vignette"></div><div class="spin-hint">← Drag to rotate →</div></div>` : '';
+    /* decorative wordmark clip (e.g. an animated product name on solid black);
+       mix-blend screen in CSS drops the black so only the lettering shows */
+    const nameHtml = s.nameVideo
+      ? `<div class="name-vid rise d1"><video autoplay muted loop playsinline preload="auto" src="${s.nameVideo}"></video></div>` : '';
     const spatialHtml = s.spatialDemo
       ? `<div class="spatial-demo">
           <button class="sd-play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
@@ -129,7 +133,7 @@
     const titleHtml = s.titleImage
       ? `<div class="title-img rise d2${useTitleVid?' has-vid':''}" style="--logo-mask:url('${s.titleImage}')"><img src="${s.titleImage}" alt="${(s.titleAlt||s.title||'').replace(/<[^>]*>/g,'')}">${useTitleVid?`<video class="title-vid" autoplay muted loop playsinline preload="auto"><source src="${s.titleVideo}" type="video/webm"></video>`:''}</div>`
       : `<h1 class="title${s.titleClass?' '+s.titleClass:''} rise d2">${s.title||''}</h1>`;
-    el.innerHTML=`${media}${spinHtml}${spatialHtml}${spots}<div class="wrap">
+    el.innerHTML=`${media}${spinHtml}${nameHtml}${spatialHtml}${spots}<div class="wrap">
       <div class="eyebrow rise d1">${s.eyebrow||''}</div>
       ${titleHtml}
       <p class="lede rise d3">${s.lede||''}</p>
@@ -251,7 +255,10 @@
     function pos(e){ return e.touches?e.touches[0].clientX:e.clientX; }
     function setTime(t){
       if(!duration) return;
-      current=((t%duration)+duration)%duration;
+      /* clamp to the clip's bounds — the rotation locks at each end instead of
+         wrapping around, so there's no discontinuous jump from last frame back
+         to first (the "loop" seam the video showed on wrap) */
+      current=Math.max(0,Math.min(duration,t));
       pending=current;
     }
     function onDown(e){
