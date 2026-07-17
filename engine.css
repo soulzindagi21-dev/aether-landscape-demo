@@ -219,6 +219,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .hud *{pointer-events:auto}
 #app.revealed .hud{animation:hudFade 1.8s ease forwards}
 #app.revealed .brand-tag{animation-delay:.1s}
+#app.revealed .topnav{animation-delay:.2s}
 #app.revealed .dots{animation-delay:.28s}
 #app.revealed .ctrls{animation-delay:.46s}
 #app.revealed .viz-switch{animation-delay:.62s}
@@ -249,6 +250,35 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .viz-switch input:checked+.viz-switch-track::after{transform:translateX(18px);background:#e11d48}
 .brand-tag{left:clamp(20px,5vw,44px);top:clamp(18px,4vh,30px);
   font-size:12px;letter-spacing:.42em;font-weight:300;color:var(--ink)}
+
+/* optional top nav bar (DEMO.nav) — quick jumps to scenes/modals, themed
+   entirely through the page's own CSS variables so it matches whichever
+   demo it's used on without any per-theme CSS */
+.topnav{left:50%;top:clamp(18px,4vh,30px);transform:translateX(-50%);
+  /* left is recomputed by JS (positionTopNav) to center within the true gap
+     between brand-tag and the HUD controls, not the viewport itself — the
+     50% here is only a same-frame fallback before that first measurement */
+  display:flex;gap:clamp(4px,1.4vw,10px);
+  background:rgba(0,0,0,.3);backdrop-filter:blur(8px);
+  border:1px solid var(--line);border-radius:30px;padding:6px;max-width:min(46vw,640px)}
+.topnav button{padding:8px clamp(10px,2vw,20px);border-radius:22px;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;
+  color:var(--muted);transition:.3s var(--ease);overflow:hidden;text-overflow:ellipsis}
+.topnav button:hover{color:var(--ink);background:rgba(255,255,255,.06)}
+.topnav button:active{color:var(--accent)}
+/* landscape phones are the tightest real target here (this experience is
+   landscape-locked): brand-tag and ctrls both scale toward the edges as the
+   viewport narrows, so the nav's available center space shrinks faster than
+   its own vw-based sizing alone accounts for — clamp it down hard by width,
+   with ellipsis as the hard safety net if four labels still can't fit */
+@media (max-width:900px){
+  .topnav{gap:1px;padding:4px;max-width:clamp(140px,22vw,260px)}
+  .topnav button{padding:6px clamp(4px,1.2vw,10px);font-size:9px;letter-spacing:.02em}
+}
+@media (max-height:430px){
+  .topnav button{padding:6px clamp(6px,1.4vw,12px);font-size:9px;letter-spacing:.04em}
+  .topnav{gap:2px}
+}
 
 /* basic digital track player — themed via the page's own CSS variables */
 .player{left:50%;bottom:clamp(18px,4vh,30px);transform:translateX(-50%);

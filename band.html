@@ -38,6 +38,12 @@ window.DEMO = {
   brand:"NOCTURNE VELVET",
   entryTagline:"Live Album Experience",
   homeHref:"index.html",
+  nav:[
+    {label:"Meet The Band",go:4},
+    {label:"Merchandise",go:9},
+    {label:"Tour Dates",modal:"tour"},
+    {label:"Tickets",modal:"tickets"}
+  ],
   wipes:["assets/band-wipe.mp4"],
   player:{tracks:[
     {title:"Cathedral Arpeggio (Intro)", src:"assets/band-hero-score.mp3"}
@@ -181,6 +187,10 @@ window.DEMO = {
     ]},
     booking:{title:"Booking",tabs:[
       {name:"Contact",html:"<p>booking@nocturnevelvet.example<br>+91 00000 00000<br>@nocturnevelvet</p>"}
+    ]},
+    tickets:{title:"Tickets",tabs:[
+      {name:"Upcoming Shows",html:spec([["Mumbai","12 Aug"],["Bengaluru","15 Aug"],["Hyderabad","18 Aug"],["Delhi","22 Aug"]])+"<p>Placeholder — wire each date to its real ticketing link.</p>"},
+      {name:"General Info",html:"<p>Doors 7pm. 18+. General admission unless stated otherwise. Placeholder policy — replace with real venue and refund terms.</p>"}
     ]},
     /* ---- merch product modals (moved in from merch.html) ---- */
     tee:{title:"Ash & Gold Tour Tee",tabs:[

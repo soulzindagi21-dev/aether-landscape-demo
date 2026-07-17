@@ -11,6 +11,7 @@
   const SCENES = DEMO.scenes || [];
   const MODALS = DEMO.modals || {};
   const HOME_HREF = DEMO.homeHref || "index.html";
+  const NAV = DEMO.nav || []; /* optional top nav bar: [{label, go|modal|href}] */
   /* a bare DEMO.audio (no visible player) still works for any theme; DEMO.player
      additionally renders a transport UI, themed per-page via CSS variables */
   const PLAYER = DEMO.player || (DEMO.audio ? {tracks:[{title:BRAND, src:DEMO.audio}]} : null);
@@ -62,6 +63,10 @@
         <div class="tab-body" id="mBody"></div>
       </div></div>
       <div class="hud brand-tag" id="brandTag">${BRAND}</div>
+      ${NAV.length ? `<nav class="hud topnav" aria-label="Primary">${NAV.map(n=>{
+        const attr=n.href?`data-href="${n.href}"`:n.modal?`data-modal="${n.modal}"`:`data-go="${n.go}"`;
+        return `<button ${attr}>${n.label}</button>`;
+      }).join('')}</nav>` : ''}
       <div class="hud dots" id="dots" role="tablist" aria-label="Scenes"></div>
       <div class="hud ctrls">
         <button class="ic" id="backBtn" aria-label="Back to demos" title="Back to demos">
@@ -666,15 +671,31 @@
     if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)) goTo(current+(dx<0?1:-1));
   },{passive:true});
 
+  /* the top nav (DEMO.nav) sits between brand-tag and the HUD controls, but
+     those two aren't the same width on every theme (a long brand wordmark vs
+     a fixed 3-icon cluster), so the true gap between them isn't centered on
+     the viewport — pure CSS centering pushed the nav into whichever side had
+     less room. Measure the actual gap and center within it instead. */
+  const topNavEl=document.querySelector('.topnav');
+  function positionTopNav(){
+    if(!topNavEl) return;
+    const brand=document.getElementById('brandTag');
+    const ctrls=document.querySelector('.ctrls');
+    if(!brand||!ctrls) return;
+    const gapCenter=(brand.getBoundingClientRect().right+ctrls.getBoundingClientRect().left)/2;
+    topNavEl.style.left=gapCenter+'px';
+  }
   const rotate=document.getElementById('rotate');
   let portraitDismissed=false;
   function checkOrient(){
     const portrait=matchMedia('(orientation:portrait)').matches && innerWidth<820;
     if(portrait && !portraitDismissed) rotate.classList.add('show');
     else rotate.classList.remove('show');
+    positionTopNav();
   }
   matchMedia('(orientation:portrait)').addEventListener('change',checkOrient);
   addEventListener('resize',checkOrient);
+  positionTopNav();
   document.getElementById('skipPortrait').onclick=()=>{portraitDismissed=true;rotate.classList.remove('show');};
 
   async function requestAppFullscreen(){
