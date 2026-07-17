@@ -661,20 +661,29 @@
     updateHUD(0); checkOrient(); playScene(0); /* prepWipes() no longer called — see goTo() */
   }
   document.getElementById('enterBtn').addEventListener("click", async ()=>{
-    await requestAppFullscreen();
+    /* requestAppFullscreen() must still be the very first call made in this
+       handler (Android Chrome's gesture rule), but we don't await it before
+       covering the screen — the fullscreen viewport resize itself was
+       happening while the entry gate was still visible, and since its text/
+       button use vw/vh-relative sizing, that resize visibly reflowed them
+       (the "jerk"). Kick fullscreen off, then instantly (no transition) cover
+       with black in the same synchronous tick, so the resize/reflow happens
+       fully hidden instead of on-screen. */
+    const blackout=document.getElementById('blackout');
+    const fsPromise=requestAppFullscreen();
+    blackout.classList.add('instant','show');
+    await fsPromise;
     try{ await screen.orientation?.lock?.("landscape"); }
     catch(error){ console.warn("Orientation lock unavailable:",error); }
-    /* cinematic hand-off: fade to black, assemble the homepage underneath while
-       hidden, then fade the black away so everything reveals gracefully rather
-       than popping in the instant the entry gate disappears */
-    const blackout=document.getElementById('blackout');
-    blackout.classList.add('show');
-    await new Promise(r=>setTimeout(r,900)); /* .8s fade-to-black + settle */
+    /* cinematic hand-off: assemble the homepage underneath while hidden, then
+       fade the black away so everything reveals gracefully rather than
+       popping in the instant the entry gate disappears */
+    await new Promise(r=>setTimeout(r,900)); /* hold on black while fullscreen/orientation settle */
     hideEntryOverlay(); startExperience();
     document.getElementById('app').classList.add('revealed');
     if(audio) setPlaying(true);
     await new Promise(r=>setTimeout(r,60));
-    blackout.classList.remove('show'); /* slow 2s fade-in from black */
+    blackout.classList.remove('show','instant'); /* slow 2s fade-in from black */
   });
   document.addEventListener("fullscreenchange",()=>{ console.log("fullscreenchange:",document.fullscreenElement); });
   document.addEventListener("fullscreenerror",e=>{ console.warn("fullscreenerror:",e); });

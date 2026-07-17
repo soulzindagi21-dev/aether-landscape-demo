@@ -51,6 +51,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 #blackout{position:fixed;inset:0;z-index:120;background:#000;opacity:0;pointer-events:none;
   transition:opacity 2s ease} /* base transition = the slow 2s fade-IN from black */
 #blackout.show{opacity:1;pointer-events:auto;transition:opacity .8s ease} /* quicker fade TO black */
+/* used only for the very first cover on Enter, so the fullscreen viewport
+   resize (which visibly reflowed the entry gate's vw/vh-sized text/button)
+   happens fully hidden behind solid black instead of mid-transition */
+#blackout.show.instant{transition:none}
 /* scene-to-scene navigation reuses the same black overlay (fade to black,
    swap the scene while hidden, fade back in) — quicker + symmetric vs the
    dramatic first entrance. Higher specificity than the .show rules above. */
@@ -280,6 +284,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
      so the slow reveal still reads as designed even with reduced-motion on */
   #blackout{transition-duration:2s!important}
   #blackout.show{transition-duration:.8s!important}
+  #blackout.show.instant{transition-duration:0s!important}
   #blackout.nav{transition-duration:.8s!important}
   #blackout.nav.show{transition-duration:.65s!important}
   .rise{animation-duration:2s!important}
@@ -403,10 +408,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 /* decorative animated wordmark (product-name clip on solid black). mix-blend
    screen knocks the black out so only the lettering rides over the scene;
    sits top-centre, above the product, and never intercepts drag/clicks */
-.name-vid{position:absolute;z-index:2;top:clamp(10px,3.5vh,32px);left:50%;transform:translateX(-50%);
-  width:min(360px,32vw);pointer-events:none;mix-blend-mode:screen}
+.name-vid{position:absolute;z-index:2;top:50%;right:clamp(16px,5.5vw,56px);transform:translateY(-50%);
+  width:min(430px,38vw);pointer-events:none;mix-blend-mode:screen}
 .name-vid video{width:100%;height:auto;display:block}
-@media (max-height:430px){.name-vid{top:8px;width:min(300px,30vw)}}
+@media (max-height:430px){.name-vid{width:min(340px,34vw)}}
 
 /* flat vs spatial audio A/B demo */
 .spatial-demo{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);z-index:3;
