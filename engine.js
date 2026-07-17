@@ -660,30 +660,50 @@
     void scenes[0].offsetWidth; scenes[0].classList.remove('enter-zoom');
     updateHUD(0); checkOrient(); playScene(0); /* prepWipes() no longer called — see goTo() */
   }
+  /* Freeze the entry gate's rendered layout at click time. The fullscreen
+     viewport resize would otherwise reflow the gate's vw/vh-sized text+button
+     (the "jerk") — and because we want a smooth fade-to-black (not a hard cut),
+     the gate stays partly visible during that resize, so it must not move.
+     Locking font metrics to px and pinning the block to its current pixel rect
+     makes the resize invisible: the gate holds perfectly still while the black
+     fades over it. */
+  function freezeEntryGate(){
+    const inner=document.querySelector('#entry .entry-inner');
+    if(!inner) return;
+    [inner,...inner.querySelectorAll('*')].forEach(el=>{
+      const cs=getComputedStyle(el);
+      el.style.fontSize=cs.fontSize;
+      el.style.letterSpacing=cs.letterSpacing;
+    });
+    const r=inner.getBoundingClientRect();
+    inner.style.position='fixed';
+    inner.style.top=r.top+'px';
+    inner.style.left=r.left+'px';
+    inner.style.width=r.width+'px';
+    inner.style.margin='0';
+    inner.style.transform='none';
+  }
   document.getElementById('enterBtn').addEventListener("click", async ()=>{
-    /* requestAppFullscreen() must still be the very first call made in this
-       handler (Android Chrome's gesture rule), but we don't await it before
-       covering the screen — the fullscreen viewport resize itself was
-       happening while the entry gate was still visible, and since its text/
-       button use vw/vh-relative sizing, that resize visibly reflowed them
-       (the "jerk"). Kick fullscreen off, then instantly (no transition) cover
-       with black in the same synchronous tick, so the resize/reflow happens
-       fully hidden instead of on-screen. */
-    const blackout=document.getElementById('blackout');
+    /* requestAppFullscreen() stays the very first call (Android Chrome's
+       gesture rule). Instead of hard-cutting to black to hide the resize
+       reflow, we freeze the gate's layout (see freezeEntryGate) so it holds
+       still, then fade smoothly to black over it. */
     const fsPromise=requestAppFullscreen();
-    blackout.classList.add('instant','show');
+    freezeEntryGate();
+    const blackout=document.getElementById('blackout');
+    blackout.classList.add('show'); /* smooth .8s fade to black */
     await fsPromise;
     try{ await screen.orientation?.lock?.("landscape"); }
     catch(error){ console.warn("Orientation lock unavailable:",error); }
     /* cinematic hand-off: assemble the homepage underneath while hidden, then
        fade the black away so everything reveals gracefully rather than
        popping in the instant the entry gate disappears */
-    await new Promise(r=>setTimeout(r,900)); /* hold on black while fullscreen/orientation settle */
+    await new Promise(r=>setTimeout(r,900)); /* let the fade-to-black complete + settle */
     hideEntryOverlay(); startExperience();
     document.getElementById('app').classList.add('revealed');
     if(audio) setPlaying(true);
     await new Promise(r=>setTimeout(r,60));
-    blackout.classList.remove('show','instant'); /* slow 2s fade-in from black */
+    blackout.classList.remove('show'); /* slow 2s fade-in from black */
   });
   document.addEventListener("fullscreenchange",()=>{ console.log("fullscreenchange:",document.fullscreenElement); });
   document.addEventListener("fullscreenerror",e=>{ console.warn("fullscreenerror:",e); });

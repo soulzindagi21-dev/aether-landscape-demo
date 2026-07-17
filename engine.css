@@ -51,10 +51,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 #blackout{position:fixed;inset:0;z-index:120;background:#000;opacity:0;pointer-events:none;
   transition:opacity 2s ease} /* base transition = the slow 2s fade-IN from black */
 #blackout.show{opacity:1;pointer-events:auto;transition:opacity .8s ease} /* quicker fade TO black */
-/* used only for the very first cover on Enter, so the fullscreen viewport
-   resize (which visibly reflowed the entry gate's vw/vh-sized text/button)
-   happens fully hidden behind solid black instead of mid-transition */
-#blackout.show.instant{transition:none}
 /* scene-to-scene navigation reuses the same black overlay (fade to black,
    swap the scene while hidden, fade back in) — quicker + symmetric vs the
    dramatic first entrance. Higher specificity than the .show rules above. */
@@ -284,7 +280,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
      so the slow reveal still reads as designed even with reduced-motion on */
   #blackout{transition-duration:2s!important}
   #blackout.show{transition-duration:.8s!important}
-  #blackout.show.instant{transition-duration:0s!important}
   #blackout.nav{transition-duration:.8s!important}
   #blackout.nav.show{transition-duration:.65s!important}
   .rise{animation-duration:2s!important}
