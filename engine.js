@@ -613,16 +613,20 @@
     else if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(current+1);
     else if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(current-1);
   });
-  /* swipe-to-navigate must not fire for drags that start on the 360 viewer —
-     its own drag-to-rotate gesture is horizontal too, so without this guard
-     every rotate drag also satisfied the swipe threshold and jumped scenes */
-  let sx=0,sy=0,sInSpin=false;
+  /* swipe-to-navigate is disabled entirely on any scene that has a 360
+     viewer — drag there means "rotate the product", never "change page".
+     This must be scene-based, not target-based (e.target.closest('.spin360')):
+     the spin scene's text/CTA layer sits above the viewer with its own
+     pointer-events, so a drag starting on those elements isn't "inside"
+     .spin360 and a target check lets the swipe fire anyway — which is
+     exactly the page-jump bug this guards against. Navigation on that scene
+     still works via dots, arrows, and CTA buttons. */
+  let sx=0,sy=0;
   stage.addEventListener('touchstart',e=>{
     sx=e.touches[0].clientX;sy=e.touches[0].clientY;
-    sInSpin=!!e.target.closest('.spin360');
   },{passive:true});
   stage.addEventListener('touchend',e=>{
-    if(sInSpin) return;
+    if(scenes[current]&&scenes[current].querySelector('.spin360')) return;
     const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)) goTo(current+(dx<0?1:-1));
   },{passive:true});
@@ -684,21 +688,26 @@
     inner.style.transform='none';
   }
   document.getElementById('enterBtn').addEventListener("click", async ()=>{
-    /* requestAppFullscreen() stays the very first call (Android Chrome's
-       gesture rule). Instead of hard-cutting to black to hide the resize
-       reflow, we freeze the gate's layout (see freezeEntryGate) so it holds
-       still, then fade smoothly to black over it. */
-    const fsPromise=requestAppFullscreen();
+    /* Sequence (deliberate, per design): fade the entry gate fully to black
+       FIRST, and only then request fullscreen — so the viewport expansion
+       (and any reflow it causes) happens entirely behind opaque black and is
+       invisible. This knowingly departs from the earlier "fullscreen must be
+       the first statement" rule: Chrome's transient-activation window after a
+       click is ~5s, so a .9s fade still leaves the gesture valid. If some
+       Android build ever refuses fullscreen because of the delay, this
+       ordering is the first thing to revisit. Gate layout is still frozen so
+       nothing shifts during the fade itself. */
     freezeEntryGate();
     const blackout=document.getElementById('blackout');
     blackout.classList.add('show'); /* smooth .8s fade to black */
-    await fsPromise;
+    await new Promise(r=>setTimeout(r,900)); /* fully black before anything moves */
+    await requestAppFullscreen();
     try{ await screen.orientation?.lock?.("landscape"); }
     catch(error){ console.warn("Orientation lock unavailable:",error); }
+    await new Promise(r=>setTimeout(r,350)); /* let the fullscreen resize settle under black */
     /* cinematic hand-off: assemble the homepage underneath while hidden, then
        fade the black away so everything reveals gracefully rather than
        popping in the instant the entry gate disappears */
-    await new Promise(r=>setTimeout(r,900)); /* let the fade-to-black complete + settle */
     hideEntryOverlay(); startExperience();
     document.getElementById('app').classList.add('revealed');
     if(audio) setPlaying(true);
