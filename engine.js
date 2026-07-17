@@ -103,8 +103,12 @@
         <div class="plate" ${s.poster?`style="background-image:url('${s.poster}')"`:''}></div>
         <div class="tint"></div></div>`;
     }
+    const spinMedia = s.spin && s.spin.video
+      ? `<video muted playsinline preload="auto" ${s.spin.poster?`poster="${s.spin.poster}"`:''}></video>`
+      : `<img alt="Drag to rotate the product" draggable="false">`;
+    const spinBg = (s.spin&&s.spin.bg)||'#000';
     const spinHtml = s.spin
-      ? `<div class="spin360" ${s.spin.bg?`style="background:${s.spin.bg}"`:''}><img alt="Drag to rotate the product" draggable="false"><div class="spin-hint">← Drag to rotate →</div></div>` : '';
+      ? `<div class="spin360" style="background:${spinBg};--spin-bg:${spinBg}"><div class="spin-glow"></div>${spinMedia}<div class="spin-vignette"></div><div class="spin-hint">← Drag to rotate →</div></div>` : '';
     const spatialHtml = s.spatialDemo
       ? `<div class="spatial-demo">
           <button class="sd-play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
@@ -192,7 +196,11 @@
     const s=SCENES[i]; if(!s||!s.spin) return null;
     const holder=scenes[i].querySelector('.spin360'); if(!holder||holder.dataset.ready) return holder;
     holder.dataset.ready='1';
-    const cfg=s.spin, count=cfg.count||0, pad=cfg.pad||2, pxPerFrame=cfg.pxPerFrame||40;
+    return s.spin.video ? ensureSpinVideo(holder,s.spin) : ensureSpinFrames(holder,s.spin);
+  }
+  /* legacy mode: drag swaps between a numbered sequence of still frames */
+  function ensureSpinFrames(holder,cfg){
+    const count=cfg.count||0, pad=cfg.pad||2, pxPerFrame=cfg.pxPerFrame||40;
     const frameSrc=(n)=> cfg.frames ? cfg.frames[n] : (cfg.base+String(n+1).padStart(pad,'0')+cfg.ext);
     const img=holder.querySelector('img');
     img.src=cfg.poster||(count?frameSrc(0):'');
@@ -223,6 +231,55 @@
     holder.addEventListener('touchmove',onMove,{passive:true});
     holder.addEventListener('touchend',onUp);
     holder.__setFrame=setFrame; /* exposed for testing */
+    return holder;
+  }
+  /* preferred mode: drag scrubs the playhead of a single locked-off rotation
+     clip instead of swapping frame images — avoids per-frame motion blur
+     entirely since nothing is generated at "fast spin" speed, and there's
+     only one asset to manage instead of a numbered frame sequence */
+  function ensureSpinVideo(holder,cfg){
+    const vid=holder.querySelector('video');
+    vid.src=cfg.video;
+    const pxPerTurn=cfg.pxPerTurn||600; /* px of drag for one full 360deg turn */
+    /* drag→rotation direction. Default: dragging right advances the playhead so
+       the product surface tracks the finger. Set spin.invertDrag:true in the
+       config to reverse it — no video re-encode needed, this is the single
+       source of truth for spin direction. */
+    const dragSign=cfg.invertDrag?-1:1;
+    let duration=0, current=0, dragging=false, startX=0, startTime=0, pending=null;
+    vid.addEventListener('loadedmetadata',()=>{ duration=vid.duration||0; });
+    function pos(e){ return e.touches?e.touches[0].clientX:e.clientX; }
+    function setTime(t){
+      if(!duration) return;
+      current=((t%duration)+duration)%duration;
+      pending=current;
+    }
+    function onDown(e){
+      dragging=true; startX=pos(e); startTime=current;
+      holder.classList.add('dragging','hinted');
+    }
+    function onMove(e){
+      if(!dragging||!duration) return;
+      const dx=pos(e)-startX;
+      setTime(startTime+dragSign*(dx/pxPerTurn)*duration);
+    }
+    function onUp(){ dragging=false; holder.classList.remove('dragging'); }
+    holder.addEventListener('pointerdown',onDown);
+    holder.addEventListener('pointermove',onMove);
+    window.addEventListener('pointerup',onUp);
+    holder.addEventListener('touchstart',onDown,{passive:true});
+    holder.addEventListener('touchmove',onMove,{passive:true});
+    holder.addEventListener('touchend',onUp);
+    /* rAF-throttled seek: writing video.currentTime on every single pointermove
+       queues seeks faster than the decoder can drain them, so the scrub visibly
+       lags the cursor — cap it to one seek per rendered frame instead */
+    (function tick(){
+      requestAnimationFrame(tick);
+      if(pending===null) return;
+      if(Math.abs(vid.currentTime-pending)>0.008) vid.currentTime=pending;
+      pending=null;
+    })();
+    holder.__setTime=setTime; /* exposed for testing */
     return holder;
   }
 
@@ -549,9 +606,16 @@
     else if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(current+1);
     else if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(current-1);
   });
-  let sx=0,sy=0;
-  stage.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  /* swipe-to-navigate must not fire for drags that start on the 360 viewer —
+     its own drag-to-rotate gesture is horizontal too, so without this guard
+     every rotate drag also satisfied the swipe threshold and jumped scenes */
+  let sx=0,sy=0,sInSpin=false;
+  stage.addEventListener('touchstart',e=>{
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+    sInSpin=!!e.target.closest('.spin360');
+  },{passive:true});
   stage.addEventListener('touchend',e=>{
+    if(sInSpin) return;
     const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)) goTo(current+(dx<0?1:-1));
   },{passive:true});

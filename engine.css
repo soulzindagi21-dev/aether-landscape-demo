@@ -368,13 +368,33 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .spin360{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;
   cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .spin360.dragging{cursor:grabbing}
-.spin360 img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+.spin360 img,.spin360 video{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;pointer-events:none}
+/* full-bleed grayscale glow, independent of the product footage — softens the
+   whole frame into one continuous wash of light rather than a spotlight, and
+   reads as cinematic ambience rather than a static product shot. Drag-to-rotate
+   only seeks the video's playhead, never touches this layer, so the glow
+   drifts on its own timeline regardless of spin position. */
+.spin-glow{position:absolute;inset:-40%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 46%,rgba(255,255,255,.22),rgba(255,255,255,.09) 45%,rgba(255,255,255,0) 72%);
+  filter:blur(40px);animation:spinGlowDrift 16s ease-in-out infinite alternate}
+@keyframes spinGlowDrift{
+  0%{transform:scale(1) translate(0,0);opacity:.75}
+  50%{transform:scale(1.15) translate(2%,-2%);opacity:1}
+  100%{transform:scale(1) translate(-2%,1.5%);opacity:.82}
+}
+@media (prefers-reduced-motion:reduce){.spin-glow{animation:none}}
+/* feathers the video's own hard rectangular edge (its object-fit:contain
+   letterbox bounds) into the scene's flat bg color, so the seam between
+   "inside the footage" and "outside the footage" disappears instead of
+   reading as a pasted-in box */
+.spin-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,transparent 48%,var(--spin-bg) 88%)}
 /* the text/CTA layer sits above the viewer for legibility, but must let clicks
    and drags pass through its empty space to reach the viewer beneath it —
    only its actual content stays clickable */
 .spin360 ~ .wrap{pointer-events:none}
 .spin360 ~ .wrap *{pointer-events:auto}
-.spin-hint{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);
+.spin-hint{position:absolute;z-index:3;bottom:14%;left:50%;transform:translateX(-50%);
   font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
   background:rgba(0,0,0,.4);padding:8px 18px;border-radius:20px;border:1px solid var(--line);
   opacity:1;transition:opacity .6s var(--ease);pointer-events:none;white-space:nowrap}
