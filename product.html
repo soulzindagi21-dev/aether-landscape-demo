@@ -36,6 +36,11 @@
 <body>
 <script>
 function spec(rows){return '<div class="spec">'+rows.map(function(r){return '<div><span>'+r[0]+'</span><b>'+r[1]+'</b></div>';}).join('')+'</div>';}
+/* heavy video files are served from R2 (Cloudflare CDN) instead of this
+   repo's assets/ folder — keeps the repo small and gets global edge
+   caching. Small posters/images stay local. Swap this one line if the
+   bucket ever moves to a custom domain. */
+const CDN="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/";
 window.DEMO = {
   brand:"AURA ONE",
   entryTagline:"Product Launch · 2026",
@@ -44,7 +49,7 @@ window.DEMO = {
   tryOn:{ endpoint:"/api/try-it-on" },
   scenes:[
     { id:"intro", trans:"zoom", layout:"left",
-      loop:"assets/product-homepage-hero.mp4", poster:"assets/product-homepage-hero-poster.jpg",
+      loop:CDN+"product-homepage-hero.mp4", poster:"assets/product-homepage-hero-poster.jpg",
       eyebrow:"Introducing",
       titleImage:"assets/aura-one-logotype.png", titleAlt:"Aura One",
       titleVideo:"assets/aura-one-logotype-anim.webm",
@@ -61,7 +66,7 @@ window.DEMO = {
       ctas:[{label:"Back",go:0},{label:"Explore the Sound",style:"solid",go:2}]
     },
     { id:"story", trans:"pan",
-      loop:"assets/product-homepage-detail.mp4", poster:"assets/product-homepage-detail-poster.jpg",
+      loop:CDN+"product-homepage-detail.mp4", poster:"assets/product-homepage-detail-poster.jpg",
       eyebrow:"Engineered Sound",
       title:'Silence,<br><b>Perfected</b>',
       lede:"Explore the acoustics, the materials and the intelligence inside. Tap a point to reveal each system.",

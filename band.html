@@ -34,6 +34,11 @@ function spec(rows){return '<div class="spec">'+rows.map(function(r){return '<di
 /* must be defined BEFORE window.DEMO — the modal strings below call it while
    the config object is being built (same ordering rule as spec() above) */
 function spec_price(p){return '<div class="price">'+p+'</div>';}
+/* heavy video files are served from R2 (Cloudflare CDN) instead of this
+   repo's assets/ folder — keeps the repo small and gets global edge
+   caching. Small posters/images stay local. Swap this one line if the
+   bucket ever moves to a custom domain. */
+const CDN="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/";
 window.DEMO = {
   brand:"NOCTURNE VELVET",
   entryTagline:"Live Album Experience",
@@ -59,7 +64,7 @@ window.DEMO = {
       ctas:[{label:"Step Inside",style:"solid",go:1}]
     },
     { id:"intro", trans:"zoom", layout:"left",
-      loop:"assets/band-intro-record.mp4", poster:"assets/band-intro-record-poster.jpg",
+      loop:CDN+"band-intro-record.mp4", poster:"assets/band-intro-record-poster.jpg",
       eyebrow:"New Album · Out Now",
       titleClass:"metal",
       title:'Ash &amp; <b>Gold</b>',
