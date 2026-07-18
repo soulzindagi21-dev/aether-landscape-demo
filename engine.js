@@ -74,6 +74,8 @@
         <button class="ic off" id="soundBtn" aria-label="Toggle sound">
           <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="on-path" d="M16 8a5 5 0 0 1 0 8"/><path class="on-path" d="M19 5a9 9 0 0 1 0 14"/></svg></button>
         <button class="ic" id="homeBtn" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
+        <button class="ic" id="fsBtn" aria-label="Enter fullscreen" title="Enter fullscreen">
+          <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
       </div>
       ${HAS_AUDIO ? `<label class="hud viz-switch" id="vizSwitch" title="Toggle visualizer">
         <input type="checkbox" id="vizToggle" checked><span class="viz-switch-track"></span>
@@ -774,6 +776,17 @@
   const ENTERED_KEY='aether-entered';
   function markEntered(){ try{ sessionStorage.setItem(ENTERED_KEY,'1'); }catch(err){ console.warn('sessionStorage unavailable:',err); } }
   function wasEntered(){ try{ return sessionStorage.getItem(ENTERED_KEY)==='1'; }catch(err){ return false; } }
+  /* A plain page reload and a real click-through to another page of the same
+     experience are indistinguishable from a "page just loaded" event alone —
+     both just fire window.load. Without this check, reloading band.html
+     after entering it once would silently skip the gate too, which reads as
+     "the entry page vanished" since the visitor never sees why they're
+     suddenly mid-experience. The Navigation Timing API can tell the two
+     apart: only skip the gate on true navigations, never on a reload. */
+  function isReload(){
+    try{ return performance.getEntriesByType('navigation')[0]?.type==='reload'; }
+    catch(err){ return false; }
+  }
   function skipEntryGate(){
     /* arrive already-black, assemble, then run the normal 2s reveal — page-to-
        page moves inside the experience read as one continuous fade through
@@ -783,48 +796,51 @@
     void blackout.offsetWidth; blackout.style.transition='';
     hideEntryOverlay(); startExperience();
     document.getElementById('app').classList.add('revealed');
-    if(audio) setPlaying(true); /* may be autoplay-blocked without a gesture — retried below */
-    /* fullscreen cannot survive a cross-page navigation (browsers require a
-       fresh gesture), so reclaim it — and kick blocked audio — on the first
-       tap/click anywhere in the new page */
-    document.addEventListener('pointerdown',()=>{
-      requestAppFullscreen();
-      try{ screen.orientation?.lock?.("landscape"); }
-      catch(err){ console.warn("Orientation lock unavailable:",err); }
-      if(audio&&!soundOn) setPlaying(true);
-    },{once:true});
+    if(audio) setPlaying(true); /* may be autoplay-blocked without a gesture — fine, fsBtn covers fullscreen */
     setTimeout(()=>blackout.classList.remove('show'),80);
   }
   document.getElementById('enterBtn').addEventListener("click", async ()=>{
-    /* Sequence (deliberate, per design): fade the entry gate fully to black
-       FIRST, and only then request fullscreen — so the viewport expansion
-       (and any reflow it causes) happens entirely behind opaque black and is
-       invisible. This knowingly departs from the earlier "fullscreen must be
-       the first statement" rule: Chrome's transient-activation window after a
-       click is ~5s, so a .9s fade still leaves the gesture valid. If some
-       Android build ever refuses fullscreen because of the delay, this
-       ordering is the first thing to revisit. Gate layout is still frozen so
-       nothing shifts during the fade itself. */
+    /* requestAppFullscreen() MUST be the first call in this handler, before
+       any await — some browsers (confirmed: a real Android phone) silently
+       refuse fullscreen if it's requested even ~1s after the click instead
+       of immediately. An earlier version of this handler waited for the
+       fade-to-black to finish first for a smoother look; that's exactly the
+       delay that broke fullscreen, so it's gone. freezeEntryGate() still
+       hides the resize reflow (the "jerk") by locking the gate's layout
+       before the viewport changes size, so the fade still looks clean. */
     markEntered();
+    const fsPromise=requestAppFullscreen();
     freezeEntryGate();
     const blackout=document.getElementById('blackout');
-    blackout.classList.add('show'); /* smooth .8s fade to black */
-    await new Promise(r=>setTimeout(r,900)); /* fully black before anything moves */
-    await requestAppFullscreen();
+    blackout.classList.add('show'); /* smooth .8s fade to black, starts immediately */
+    await fsPromise;
     try{ await screen.orientation?.lock?.("landscape"); }
     catch(error){ console.warn("Orientation lock unavailable:",error); }
-    await new Promise(r=>setTimeout(r,350)); /* let the fullscreen resize settle under black */
-    /* cinematic hand-off: assemble the homepage underneath while hidden, then
-       fade the black away so everything reveals gracefully rather than
-       popping in the instant the entry gate disappears */
+    await new Promise(r=>setTimeout(r,900)); /* let the fade-to-black finish + settle */
     hideEntryOverlay(); startExperience();
     document.getElementById('app').classList.add('revealed');
     if(audio) setPlaying(true);
     await new Promise(r=>setTimeout(r,60));
     blackout.classList.remove('show'); /* slow 2s fade-in from black */
   });
-  document.addEventListener("fullscreenchange",()=>{ console.log("fullscreenchange:",document.fullscreenElement); });
   document.addEventListener("fullscreenerror",e=>{ console.warn("fullscreenerror:",e); });
+
+  /* ---------- manual fullscreen toggle ----------
+     Visible only when NOT in fullscreen — covers every case the automatic
+     flows can't: fullscreen refused outright, or lost on a cross-page nav
+     (browsers always drop fullscreen on navigation and require a fresh
+     gesture to re-enter it, so skipEntryGate() can't silently reclaim it). */
+  const fsBtn=document.getElementById('fsBtn');
+  function updateFsBtn(){ fsBtn.classList.toggle('fs-hidden',!!document.fullscreenElement); }
+  if(fsBtn){
+    updateFsBtn();
+    document.addEventListener('fullscreenchange',updateFsBtn);
+    fsBtn.addEventListener('click',async()=>{
+      await requestAppFullscreen();
+      try{ await screen.orientation?.lock?.("landscape"); }
+      catch(error){ console.warn("Orientation lock unavailable:",error); }
+    });
+  }
 
   /* ---------- homepage preload gate ----------
      Waits for scene 0's poster + hero video (and the ambient track, since it
@@ -856,7 +872,7 @@
   window.addEventListener('load',()=>{
     preloadFirstScene().then(()=>{
       document.getElementById('loader').classList.add('hide');
-      if(wasEntered()) skipEntryGate();
+      if(wasEntered() && !isReload()) skipEntryGate();
     });
   });
 })();

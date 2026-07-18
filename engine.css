@@ -237,6 +237,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .ic:hover{border-color:var(--accent)}
 .ic svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:1.5}
 .ic.off svg .on-path{display:none}
+/* fullscreen toggle: only ever shown while NOT in fullscreen */
+.ic.fs-hidden{display:none}
 /* sits where the scene page-count marker used to be, bottom-right */
 .viz-switch{right:clamp(20px,5vw,44px);bottom:clamp(18px,4vh,30px);
   display:inline-flex;align-items:center;width:42px;height:24px;cursor:pointer}
