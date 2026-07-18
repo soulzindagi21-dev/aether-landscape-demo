@@ -24,7 +24,7 @@
   /* ---------- inject shared shell markup ---------- */
   document.body.insertAdjacentHTML('afterbegin', `
     <div id="blackout"></div>
-    <div id="loader">
+    <div id="loader" class="hide">
       <div class="grain"></div>
       <div class="loader-glow"></div>
       <div class="loader-inner">
@@ -817,6 +817,16 @@
     try{ await screen.orientation?.lock?.("landscape"); }
     catch(error){ console.warn("Orientation lock unavailable:",error); }
     await new Promise(r=>setTimeout(r,900)); /* let the fade-to-black finish + settle */
+    /* on a slow connection scene 0's media may still be loading at this
+       point — show the spinner now, entirely behind the already-opaque
+       black, so there's no visible seam either way. On a normal connection
+       preloadReady is already true here and this is skipped outright. */
+    if(!preloadReady){
+      const loaderEl=document.getElementById('loader');
+      loaderEl.classList.remove('hide');
+      await preloadPromise;
+      loaderEl.classList.add('hide');
+    }
     hideEntryOverlay(); startExperience();
     document.getElementById('app').classList.add('revealed');
     if(audio) setPlaying(true);
@@ -869,10 +879,21 @@
     const cap=new Promise(res=>setTimeout(res,8000));
     return Promise.race([Promise.all(tasks), cap]);
   }
+  /* the loader now only ever appears for the RETURNING-visitor path below
+     (assets for a fresh in-experience page load) — a first-time visitor
+     never sees it, because the entry gate itself is already on screen and
+     tappable the instant the page loads (see enterBtn handler: it folds
+     this same preload wait in AFTER the tap, behind the fade-to-black,
+     instead of blocking the gate behind a silent spinner first). */
+  let preloadReady=false, preloadPromise=null;
   window.addEventListener('load',()=>{
-    preloadFirstScene().then(()=>{
-      document.getElementById('loader').classList.add('hide');
-      if(wasEntered() && !isReload()) skipEntryGate();
+    const returning=wasEntered() && !isReload();
+    const loaderEl=document.getElementById('loader');
+    if(returning) loaderEl.classList.remove('hide');
+    preloadPromise=preloadFirstScene();
+    preloadPromise.then(()=>{
+      preloadReady=true;
+      if(returning){ loaderEl.classList.add('hide'); skipEntryGate(); }
     });
   });
 })();
