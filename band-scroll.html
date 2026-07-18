@@ -61,7 +61,14 @@
     .media-frame noscript img,.media-frame noscript video{position:absolute;inset:0}
     .audio-toggle{border:1px solid rgba(255,255,255,.32);background:transparent;color:inherit;cursor:pointer}
     .member-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-    .member-card{margin:0}.member-card .media-frame{aspect-ratio:4/5}.member-card figcaption{padding:.75rem .15rem 0;color:var(--muted);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase}
+    .member-card{margin:0}.member-card .media-frame{aspect-ratio:3/2}.member-card figcaption{padding:.75rem .15rem 0;color:var(--muted);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase}
+    /* these spotlight photos are 21:9 cinematic frames with the artist
+       composed in the right half and empty space on the left (built for
+       the fullscreen site's text-on-left layout) — 3:2 keeps ~64% of the
+       original width (vs. ~34% at the old 4:5), and biasing the crop
+       rightward keeps every artist fully in frame instead of centering
+       on what is mostly negative space */
+    .member-card img{object-position:68% center}
     .member-bio{margin:.4rem .15rem 0;color:#a99b9c;font-size:.78rem;line-height:1.5;text-transform:none;letter-spacing:normal}
     .press-image{aspect-ratio:16/9}
     .record-grid{display:grid;gap:1.1rem}
