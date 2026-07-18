@@ -157,6 +157,25 @@
     d.setAttribute('aria-label','Scene '+(i+1)); d.onclick=()=>goTo(i); dotsEl.appendChild(d);
   });
   const scenes=[...document.querySelectorAll('.scene')];
+  /* Phones struggling to decode a 1920px video is a GPU/decode problem, not
+     a download-speed problem — moving files to a CDN doesn't touch it.
+     Scenes can supply a lighter "*Mobile" rendition (e.g. 960px instead of
+     1920px) via loopMobile / spin.videoMobile; whichever one gets chosen
+     is decided once here, by viewport size, not re-evaluated on resize —
+     this experience is landscape-locked, so the viewport doesn't change
+     shape mid-session the way a normal responsive page's would. */
+  /* Evaluate the phone check LIVE per video (via matchMedia) rather than
+     snapshotting window.innerWidth once at parse time: innerWidth is
+     documented to read unreliably on some mobile browsers during the initial
+     synchronous script run (before the viewport meta fully applies), whereas
+     a max-width media query respects the viewport meta and is correct from
+     the first evaluation. Landscape-locked, so this doesn't thrash on resize. */
+  function preferMobileVideo(){
+    try{ return matchMedia('(max-width:900px)').matches; }
+    catch(e){ return Math.max(innerWidth,innerHeight) <= 900; }
+  }
+  function pickVideoSrc(desktop,mobile){ return (preferMobileVideo() && mobile) ? mobile : desktop; }
+
   /* start buffering the homepage hero the instant the page loads — not on
      Enter click — so by the time the visitor can click, it's already ready */
   if(SCENES[0]&&SCENES[0].loop) ensureLoopVideo(0);
@@ -179,7 +198,7 @@
       v.muted=true; v.defaultMuted=true; v.setAttribute('muted','');
       v.loop=true; v.playsInline=true; v.setAttribute('playsinline','');
       v.setAttribute('autoplay','');
-      v.preload='auto'; v.src=s.loop;
+      v.preload='auto'; v.src=pickVideoSrc(s.loop,s.loopMobile);
       if(s.poster) v.poster=s.poster;
       v.addEventListener('canplay',()=>{
         v.classList.add('ready');
@@ -277,7 +296,7 @@
      only one asset to manage instead of a numbered frame sequence */
   function ensureSpinVideo(holder,cfg){
     const vid=holder.querySelector('video');
-    vid.src=cfg.video;
+    vid.src=pickVideoSrc(cfg.video,cfg.videoMobile);
     const pxPerTurn=cfg.pxPerTurn||600; /* px of drag for one full 360deg turn */
     /* drag→rotation direction. Default: dragging right advances the playhead so
        the product surface tracks the finger. Set spin.invertDrag:true in the

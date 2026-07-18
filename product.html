@@ -49,7 +49,7 @@ window.DEMO = {
   tryOn:{ endpoint:"/api/try-it-on" },
   scenes:[
     { id:"intro", trans:"zoom", layout:"left",
-      loop:CDN+"product-homepage-hero.mp4", poster:"assets/product-homepage-hero-poster.jpg",
+      loop:CDN+"product-homepage-hero.mp4", loopMobile:CDN+"product-homepage-hero-mobile.mp4", poster:"assets/product-homepage-hero-poster.jpg",
       eyebrow:"Introducing",
       titleImage:"assets/aura-one-logotype.png", titleAlt:"Aura One",
       titleVideo:"assets/aura-one-logotype-anim.webm",
@@ -61,12 +61,12 @@ window.DEMO = {
       nameVideo:"assets/aura-one-name-anim.mp4",
       eyebrow:"360° Showcase",
       lede:"Hold the arrows to turn AURA ONE and take in every angle, edge and finish.",
-      spin:{ video:"assets/aura-one-spin-360.mp4",
+      spin:{ video:"assets/aura-one-spin-360.mp4", videoMobile:CDN+"aura-one-spin-360-mobile.mp4",
              poster:"assets/aura-one-spin-360.jpg", bg:"#383a37" },
       ctas:[{label:"Back",go:0},{label:"Explore the Sound",style:"solid",go:2}]
     },
     { id:"story", trans:"pan",
-      loop:CDN+"product-homepage-detail.mp4", poster:"assets/product-homepage-detail-poster.jpg",
+      loop:CDN+"product-homepage-detail.mp4", loopMobile:CDN+"product-homepage-detail-mobile.mp4", poster:"assets/product-homepage-detail-poster.jpg",
       eyebrow:"Engineered Sound",
       title:'Silence,<br><b>Perfected</b>',
       lede:"Explore the acoustics, the materials and the intelligence inside. Tap a point to reveal each system.",
