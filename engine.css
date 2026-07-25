@@ -529,7 +529,12 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
     drop-shadow(0 3px 2px rgba(0,0,0,.85))
     drop-shadow(0 0 26px rgba(225,29,72,.4));
   background-size:100% 130%;
-  animation:metalShift 7s ease-in-out infinite alternate;
+  /* softAppear MUST be re-declared here alongside metalShift. Metal titles
+     also carry .rise, which sets opacity:0 and relies on its own
+     `animation:softAppear ... forwards` to fade back in — but .title.metal
+     outranks .rise, so declaring only metalShift silently dropped that
+     fade-in and left the title stuck at opacity:0, i.e. invisible forever. */
+  animation:softAppear 2s ease forwards, metalShift 7s ease-in-out infinite alternate;
 }
 .title.metal b{-webkit-text-fill-color:transparent}
 @keyframes metalShift{from{background-position:0 0}to{background-position:0 30%}}
