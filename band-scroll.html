@@ -128,7 +128,7 @@
   </header>
   <section class="hero" id="top" aria-labelledby="hero-title">
     <div class="hero-media media-frame">
-      <video class="lazy-media" data-src="assets/band-homepage-hero.mp4" poster="assets/band-homepage-hero-poster.jpg" muted loop playsinline preload="none" aria-label="Nocturne Velvet homepage film"></video>
+      <video class="lazy-media" data-src="assets/band-homepage-hero.mp4" data-src-mobile="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/band-homepage-hero-mobile.mp4" poster="assets/band-homepage-hero-poster.jpg" muted loop playsinline preload="none" aria-label="Nocturne Velvet homepage film"></video>
       <noscript><video src="assets/band-homepage-hero.mp4" poster="assets/band-homepage-hero-poster.jpg" muted loop playsinline controls preload="metadata"></video></noscript>
     </div>
     <div class="hero-copy reveal">
@@ -146,8 +146,8 @@
       <div class="section-head reveal"><p class="kicker">01 / Introduction</p><h2>The Record</h2></div>
       <div class="record-grid">
         <figure class="media-frame landscape reveal-media">
-          <video class="lazy-media parallax" data-src="assets/band-intro-record.mp4" poster="assets/band-intro-record-poster.jpg" muted loop playsinline preload="none" aria-label="NOCTURNE VELVET record spinning on a turntable"></video>
-          <noscript><video src="assets/band-intro-record.mp4" poster="assets/band-intro-record-poster.jpg" muted loop playsinline controls preload="metadata"></video></noscript>
+          <video class="lazy-media parallax" data-src="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/band-intro-record.mp4" data-src-mobile="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/band-intro-record-mobile.mp4" poster="assets/band-intro-record-poster.jpg" muted loop playsinline preload="none" aria-label="NOCTURNE VELVET record spinning on a turntable"></video>
+          <noscript><video src="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/band-intro-record.mp4" poster="assets/band-intro-record-poster.jpg" muted loop playsinline controls preload="metadata"></video></noscript>
         </figure>
         <div class="record-copy reveal">
           <p class="kicker">Ash & Gold</p>
@@ -225,10 +225,15 @@
     (function(){
       const lazy = document.querySelectorAll('.lazy-media');
       const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      /* phones get a lighter 960px encode where one exists (data-src-mobile);
+         a budget phone's bottleneck is video DECODE, not download, so a
+         smaller frame is what actually stops the stutter */
+      const preferMobileVideo = matchMedia('(max-width:900px)').matches;
       const load = media => {
         if(media.dataset.loaded)return;
         media.dataset.loaded='true';
-        if(media.dataset.src)media.src=media.dataset.src;
+        const chosen = (preferMobileVideo && media.dataset.srcMobile) ? media.dataset.srcMobile : media.dataset.src;
+        if(chosen)media.src=chosen;
         if(media.tagName==='VIDEO'){
           media.load();
           media.addEventListener('loadeddata',()=>media.classList.add('is-loaded'),{once:true});

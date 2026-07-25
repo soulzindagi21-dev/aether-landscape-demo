@@ -70,7 +70,11 @@ window.DEMO = {
       eyebrow:"Engineered Sound",
       title:'Silence,<br><b>Perfected</b>',
       lede:"Explore the acoustics, the materials and the intelligence inside. Tap a point to reveal each system.",
-      spatialDemo:{ flat:"assets/aura-spatial-flat.mp3", spatial:"assets/aura-spatial-spatial.mp3" },
+      /* DISABLED: the flat/spatial A/B demo renders a play button + toggle,
+         but neither audio file has ever existed in assets/ — so the control
+         was on screen doing nothing. The engine feature is intact; drop two
+         real clips into assets/ and uncomment this line to bring it back. */
+      /* spatialDemo:{ flat:"assets/aura-spatial-flat.mp3", spatial:"assets/aura-spatial-spatial.mp3" }, */
       ctas:[{label:"Full Specs",style:"solid",modal:"specs"},{label:"Continue",go:3}],
       hotspots:[
         {x:"70%",y:"32%",label:"Drivers",modal:"drivers"},

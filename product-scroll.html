@@ -80,8 +80,8 @@
 
   <section class="hero" id="top" aria-labelledby="hero-title">
     <div class="hero-media media-frame">
-      <video class="lazy-media" data-src="assets/product-homepage-hero.mp4" poster="assets/product-homepage-hero-poster.jpg" muted loop playsinline preload="none" aria-label="AURA ONE homepage film"></video>
-      <noscript><video src="assets/product-homepage-hero.mp4" poster="assets/product-homepage-hero-poster.jpg" muted loop playsinline controls preload="metadata"></video></noscript>
+      <video class="lazy-media" data-src="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/product-homepage-hero.mp4" data-src-mobile="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/product-homepage-hero-mobile.mp4" poster="assets/product-homepage-hero-poster.jpg" muted loop playsinline preload="none" aria-label="AURA ONE homepage film"></video>
+      <noscript><video src="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/product-homepage-hero.mp4" poster="assets/product-homepage-hero-poster.jpg" muted loop playsinline controls preload="metadata"></video></noscript>
     </div>
     <div class="hero-copy reveal">
       <p class="eyebrow">Official product site</p>
@@ -96,7 +96,7 @@
     <section class="section" id="detail">
       <div class="section-head reveal"><p class="kicker">01 / Engineered Sound</p><h2>Silence, Perfected</h2></div>
       <div class="product-intro">
-        <figure class="media-frame reveal-media"><video class="lazy-media product-parallax" data-src="assets/product-homepage-detail.mp4" data-poster="assets/product-homepage-detail-poster.jpg" muted loop playsinline preload="none" aria-label="AURA ONE product detail film"></video><noscript><video src="assets/product-homepage-detail.mp4" poster="assets/product-homepage-detail-poster.jpg" muted loop playsinline controls preload="metadata"></video></noscript></figure>
+        <figure class="media-frame reveal-media"><video class="lazy-media product-parallax" data-src="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/product-homepage-detail.mp4" data-src-mobile="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/product-homepage-detail-mobile.mp4" data-poster="assets/product-homepage-detail-poster.jpg" muted loop playsinline preload="none" aria-label="AURA ONE product detail film"></video><noscript><video src="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/product-homepage-detail.mp4" poster="assets/product-homepage-detail-poster.jpg" muted loop playsinline controls preload="metadata"></video></noscript></figure>
         <div class="product-copy reveal">
           <p class="kicker">AURA ONE</p><h3>Silence, Perfected</h3>
           <p>A rigid aluminium acoustic chamber and custom 40mm bio-cellulose drivers keep transients fast, bass controlled and vocals exactly where they belong.</p>
@@ -119,7 +119,7 @@
     <section class="section showcase" id="view-360">
       <div class="section-head reveal"><p class="kicker">03 / 360 view</p><h2>Every Angle</h2><p class="lede">Scroll to rotate — the film's playhead follows your scroll position.</p></div>
       <div class="showcase-media">
-        <figure class="media-frame wide reveal-media"><video id="spin-video" class="lazy-media" data-src="assets/aura-one-spin-360.mp4" data-poster="assets/aura-one-spin-360.jpg" muted playsinline preload="none" aria-label="AURA ONE 360-degree view, scroll to rotate"></video><noscript><video src="assets/aura-one-spin-360.mp4" poster="assets/aura-one-spin-360.jpg" muted loop playsinline controls preload="metadata"></video></noscript></figure>
+        <figure class="media-frame wide reveal-media"><video id="spin-video" class="lazy-media" data-src="assets/aura-one-spin-360.mp4" data-src-mobile="https://pub-3afa96cf9b154e059d4f4e41a3088b92.r2.dev/aura-one-spin-360-mobile.mp4" data-poster="assets/aura-one-spin-360.jpg" muted playsinline preload="none" aria-label="AURA ONE 360-degree view, scroll to rotate"></video><noscript><video src="assets/aura-one-spin-360.mp4" poster="assets/aura-one-spin-360.jpg" muted loop playsinline controls preload="metadata"></video></noscript></figure>
       </div>
     </section>
 
@@ -134,11 +134,16 @@
     (function(){
       const lazy=document.querySelectorAll('.lazy-media');
       const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      /* phones get a lighter 960px encode where one exists (data-src-mobile);
+         a budget phone's bottleneck is video DECODE, not download, so a
+         smaller frame is what actually stops the stutter */
+      const preferMobileVideo=matchMedia('(max-width:900px)').matches;
       const load=media=>{
         if(media.dataset.loaded)return;
         media.dataset.loaded='true';
         if(media.dataset.poster)media.poster=media.dataset.poster;
-        if(media.dataset.src)media.src=media.dataset.src;
+        const chosen=(preferMobileVideo&&media.dataset.srcMobile)?media.dataset.srcMobile:media.dataset.src;
+        if(chosen)media.src=chosen;
         if(media.tagName==='VIDEO'){
           media.load();
           media.addEventListener('loadeddata',()=>media.classList.add('is-loaded'),{once:true});
