@@ -304,22 +304,49 @@
        source of truth for spin direction. */
     const dragSign=cfg.invertDrag?-1:1;
     let duration=0, current=0, dragging=false, startX=0, startTime=0, pending=null;
-    vid.addEventListener('loadedmetadata',()=>{ duration=vid.duration||0; });
+    /* Capture the clip duration defensively. Listening for 'loadedmetadata'
+       ALONE is a race we actually lost: the engine preloads scene media, so
+       by the time this runs the video is often already loaded and that event
+       has long since fired — the listener never ran, duration stayed 0, and
+       every setTime() bailed at the !duration guard, leaving both the drag
+       and the hold-buttons completely dead. So: read it immediately if it's
+       already known, keep the events for the not-yet-loaded case, and
+       re-check lazily on interaction as a final net. */
+    function syncDuration(){
+      if(!duration && isFinite(vid.duration) && vid.duration>0) duration=vid.duration;
+      return duration;
+    }
+    syncDuration();
+    vid.addEventListener('loadedmetadata',syncDuration);
+    vid.addEventListener('durationchange',syncDuration);
     function pos(e){ return e.touches?e.touches[0].clientX:e.clientX; }
     function setTime(t){
-      if(!duration) return;
+      if(!syncDuration()) return;
       /* clamp to the clip's bounds — the rotation locks at each end instead of
          wrapping around, so there's no discontinuous jump from last frame back
          to first (the "loop" seam the video showed on wrap) */
       current=Math.max(0,Math.min(duration,t));
       pending=current;
     }
+    /* realign the tracked position with the element before a gesture starts —
+       if anything moved the video outside this closure (browser restoring a
+       cached playback position on reload, say), the first drag would
+       otherwise jump from a stale origin */
+    function syncCurrent(){
+      /* only trust the element when none of OUR writes are outstanding —
+         seeks are applied a frame later via the rAF tick below, so reading
+         currentTime while `pending` is queued (or a seek is mid-flight)
+         would snap the position backwards and stutter the rotation */
+      if(pending!==null || vid.seeking) return;
+      if(isFinite(vid.currentTime) && Math.abs(vid.currentTime-current)>0.05) current=vid.currentTime;
+    }
     function onDown(e){
+      syncCurrent();
       dragging=true; startX=pos(e); startTime=current;
       holder.classList.add('dragging','hinted');
     }
     function onMove(e){
-      if(!dragging||!duration) return;
+      if(!dragging||!syncDuration()) return;
       const dx=pos(e)-startX;
       setTime(startTime+dragSign*(dx/pxPerTurn)*duration);
     }
@@ -344,13 +371,14 @@
          otherwise deliver one huge dt and make the rotation jump instead of
          glide — cap it so a stall just pauses the turn for that moment */
       const dt=Math.max(0,Math.min(.1,(ts-lastTs)/1000)); lastTs=ts;
-      if(duration) setTime(current + holdDir*dt*(duration/secsPerTurn));
+      if(syncDuration()) setTime(current + holdDir*dt*(duration/secsPerTurn));
     }
     holder.querySelectorAll('.spin-btn').forEach(btn=>{
       const dir=(btn.classList.contains('next')?1:-1)*dragSign; /* invertDrag flips buttons too */
       function start(e){
         e.stopPropagation(); /* don't also start a drag on the holder */
         if(e.cancelable) e.preventDefault(); /* suppress long-press context menu on Android */
+        syncCurrent();
         holdDir=dir; btn.classList.add('holding'); holder.classList.add('hinted');
         if(!holdRAF){ lastTs=performance.now(); holdRAF=requestAnimationFrame(holdLoop); }
       }
